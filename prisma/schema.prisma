@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  id               Int        @id @default(autoincrement())
+  telegramId       Int?
+  telegramUsername String?
+  firstName        String
+  middleName       String?
+  lastName         String?
+  phone            String     @unique
+  transfers        Transfer[] @relation("UserTransfers")
+}
+
+// Transfer model
+model Transfer {
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  id                     String           @id @default(cuid())
+  amount                 Decimal
+  currency               Currency
+  currencyType           CurrencyType
+  senderId               Int
+  sender                 User             @relation("UserTransfers", fields: [senderId], references: [id])
+  status                 TransferStatus   @default(PENDING)
+  OTPVerification        OTPVerification?
+  recipientPhone         String
+  recipientName          String
+  recipientCountry       String?
+  // Recipient Bank details
+  recipientAddress       String? // Address of the recipient
+  recipientBankName      String? // Name of the recipient's bank
+  recipientBankAddress   String? // Address of the recipient's bank
+  recipientAccountNumber String? // Recipient's bank account number
+  recipientIBAN          String? // International Bank Account Number (if applicable)
+  recipientSWIFTBIC      String? // SWIFT/BIC code of the recipient's bank
+  recipientRoutingNumber String? // Routing number (for US and Canada)
+  recipientTransitNumber String? // Routing number (for US and Canada)
+  recipientSortCode      String? // Sort code (for UK)
+  recipientCLABE         String? // CLABE (for Mexico)
+
+  @@index([senderId], name: "sender_idx")
+}
+
+// OTPVerification model
+model OTPVerification {
+  id         Int      @id @default(autoincrement())
+  transferId String   @unique
+  otpCode    String
+  expiresAt  DateTime
+  verified   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  transfer Transfer @relation(fields: [transferId], references: [id])
+
+  @@index([transferId], name: "transfer_idx")
+}
+
+// Enum for transfer statuses
+enum TransferStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum Currency {
+  USD
+  EUR
+  GBP
+  MXN
+}
+
+enum CurrencyType {
+  FIAT
+}
