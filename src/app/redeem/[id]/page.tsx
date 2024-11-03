@@ -49,6 +49,7 @@ import Link from "next/link";
 import { api } from "~/trpc/react";
 import { useParams } from "next/navigation";
 import dayjs from "dayjs";
+import toast from "react-hot-toast";
 
 const countryOptions = [
   { value: "us", label: "United States" },
@@ -227,7 +228,10 @@ export default function Component() {
   const { id } = useParams();
 
   // tRPC Procedure calls
-  const { data: transfer } = api.transfers.getTransfer.useQuery({ id });
+  const { data: transfer } = api.transfers.getTransfer.useQuery(
+    { id: String(id) },
+    { enabled: !!id },
+  );
   const otp = api.post.otp.useMutation({ onError: console.error });
   const fillBankDetails = api.transfers.fillBankDetails.useMutation({
     onError: console.error,
@@ -265,8 +269,12 @@ export default function Component() {
   };
 
   const handleFillBankDetails = async () => {
+    if (!id) {
+      toast.error("Invalid bank transfer ID");
+      return;
+    }
     fillBankDetails.mutate({
-      bankTransferId: id,
+      bankTransferId: String(id),
       country: "Mexico",
       recipientAddress: "Address",
       recipientBankName: formData.bankName,
@@ -553,7 +561,6 @@ export default function Component() {
                         id={field.name}
                         name={field.name}
                         placeholder={field.placeholder}
-                        icon={<field.icon className="h-4 w-4 text-gray-500" />}
                         onChange={(e) =>
                           handleChange(field.name, e.target.value)
                         }
@@ -572,7 +579,6 @@ export default function Component() {
                   id="cashPickupLocation"
                   name="cashPickupLocation"
                   placeholder="Enter pickup location"
-                  icon={<Globe className="h-4 w-4 text-gray-500" />}
                   onChange={(e) =>
                     handleChange("cashPickupLocation", e.target.value)
                   }
@@ -591,7 +597,6 @@ export default function Component() {
                     name="amount"
                     type="number"
                     placeholder="0.00"
-                    icon={<DollarSign className="h-4 w-4 text-gray-500" />}
                     onChange={(e) => handleChange("amount", e.target.value)}
                     value={formData.amount}
                     required

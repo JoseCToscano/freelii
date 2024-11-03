@@ -2,16 +2,17 @@ import {
   type Currency,
   type CurrencyType,
   type PrismaClient,
+  type TransferStatus,
 } from "@prisma/client";
 
 interface INewTransfer {
-  amount: string;
+  amount: number;
   recipientPhone: string;
   recipientName: string;
   currency: Currency;
   currencyType: CurrencyType;
   senderId: number;
-  status: string;
+  status: TransferStatus;
 }
 
 interface IBankDetailsMexico {
@@ -34,7 +35,7 @@ interface IBankDetailsUK {
   country: "UK";
   recipientAddress: string;
   recipientBankName: string;
-  recipientAccountNumber;
+  recipientAccountNumber: string;
   recipientSortCode: string;
 }
 

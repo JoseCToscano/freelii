@@ -1,7 +1,7 @@
 // app/api/bot/route.js
 
 import { type NextRequest, NextResponse } from "next/server";
-import TelegramBot from "node-telegram-bot-api";
+import TelegramBot, { InlineQuery } from "node-telegram-bot-api";
 import { env } from "~/env";
 
 const bot = new TelegramBot(env.TELEGRAM_BOT_TOKEN, { webHook: true });
@@ -141,8 +141,10 @@ export async function POST(req: NextRequest) {
 
   // Pass updates to the bot
   if (update.inline_query) {
+    // @ts-expect-error - Ignore TypeScript error for inline_query event
     bot.emit("inline_query", update.inline_query);
   } else if (update.callback_query) {
+    // @ts-expect-error - Ignore TypeScript error for inline_query event
     bot.emit("callback_query", update.callback_query);
   } else if (update.message) {
     console.log("received:", update.message.text);
@@ -219,6 +221,7 @@ If everything looks correct, tap *Review & Confirm* to proceed. To cancel, tap *
         });
       });
     } else {
+      // @ts-expect-error - Ignore TypeScript error for message event
       bot.emit("message", update.message);
     }
   }
