@@ -18,6 +18,7 @@ import {
   Lock,
   Phone,
   ExternalLink,
+  CheckCircle,
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
@@ -50,6 +51,7 @@ import { api } from "~/trpc/react";
 import { useParams } from "next/navigation";
 import dayjs from "dayjs";
 import toast from "react-hot-toast";
+import { ClientTRPCErrorHandler } from "~/lib/utils";
 
 const countryOptions = [
   { value: "us", label: "United States" },
@@ -232,10 +234,22 @@ export default function Component() {
     { id: String(id) },
     { enabled: !!id },
   );
-  const otp = api.post.otp.useMutation({ onError: console.error });
+  const redeem = api.escrow.redeemFunds.useMutation({ onError: console.error });
   const fillBankDetails = api.transfers.fillBankDetails.useMutation({
     onError: console.error,
     onSuccess: () => console.log("Bank details filled"),
+  });
+  const generateOTP = api.escrow.generateOTP.useMutation({
+    onError: ClientTRPCErrorHandler,
+    onSuccess: () => {
+      toast.success("6-digit code sent to your phone");
+    },
+  });
+  const verifyOTP = api.escrow.verifyOTP.useMutation({
+    onError: ClientTRPCErrorHandler,
+    onSuccess: () => {
+      toast.success("Phone number successfully verified");
+    },
   });
 
   useEffect(() => {
@@ -287,67 +301,104 @@ export default function Component() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isExpired) {
-      setError("The form has expired. Please refresh the page to start over.");
-      return;
-    }
-    if (step === 0 && formData.otp.join("").length !== 6) {
-      setError("Please enter a valid 6-digit code");
-      return;
-    }
-    if (step === 1 && !formData.withdrawalMethod) {
-      setError("Please select a withdrawal method");
-      return;
-    }
-    if (step === 2) {
-      if (formData.withdrawalMethod === "bank") {
-        if (!formData.country) {
-          setError("Please select a country");
-          return;
-        }
-        const requiredFields =
-          fieldsByCountry[formData.country as keyof typeof fieldsByCountry];
-        const missingFields = requiredFields.filter(
-          (field) => !formData[field.name as keyof typeof formData],
-        );
-        if (missingFields.length > 0) {
-          setError(
-            `Please fill in all required fields: ${missingFields.map((f) => f.label).join(", ")}`,
-          );
-          return;
-        }
-        await handleFillBankDetails();
-      } else if (formData.withdrawalMethod === "cash") {
-        if (!formData.cashPickupLocation) {
-          setError("Please enter a cash pickup location");
-          return;
-        }
-      }
-      if (formData.withdrawalMethod !== "wallet" && !formData.amount) {
-        setError("Please enter the amount to withdraw");
+    try {
+      if (!id) {
+        toast.error("Invalid transfer ID");
         return;
       }
-    }
-    setError("");
-
-    if (step === 0) {
       setIsLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setIsLoading(false);
-    }
+      e.preventDefault();
+      if (isExpired) {
+        setError(
+          "The form has expired. Please refresh the page to start over.",
+        );
+        return;
+      }
+      if (step === 0 && formData.otp.join("").length !== 6) {
+        setError("Please enter a valid 6-digit code");
+        return;
+      }
+      if (step === 1 && !formData.withdrawalMethod) {
+        setError("Please select a withdrawal method");
+        return;
+      }
+      if (step === 2) {
+        if (formData.withdrawalMethod === "bank") {
+          if (!formData.country) {
+            setError("Please select a country");
+            return;
+          }
+          const requiredFields =
+            fieldsByCountry[formData.country as keyof typeof fieldsByCountry];
+          const missingFields = requiredFields.filter(
+            (field) => !formData[field.name as keyof typeof formData],
+          );
+          if (missingFields.length > 0) {
+            setError(
+              `Please fill in all required fields: ${missingFields.map((f) => f.label).join(", ")}`,
+            );
+            return;
+          }
+          await handleFillBankDetails();
+        } else if (formData.withdrawalMethod === "cash") {
+          if (!formData.cashPickupLocation) {
+            setError("Please enter a cash pickup location");
+            return;
+          }
 
-    setStep(step + 1);
-    if (step === 2) {
-      console.log("Form submitted:", formData);
-      // Here you would typically send the form data to your backend
+          // Handle redeem
+          await redeem.mutateAsync({ transferId: String(id) });
+          toast.success("Funds successfully redeemed");
+        }
+        if (formData.withdrawalMethod !== "wallet" && !formData.amount) {
+          setError("Please enter the amount to withdraw");
+          return;
+        }
+      }
+      setError("");
+
+      if (step === 0) {
+        setIsLoading(true);
+        const res = await verifyOTP.mutateAsync({
+          otp: Number(formData.otp.join("")),
+          transferId: String(id),
+        });
+        if (res) {
+          setTimeLeft(25 * 60);
+        }
+        setIsLoading(false);
+      }
+
+      setStep(step + 1);
+      if (step === 2) {
+        console.log("Form submitted:", formData);
+        // Here you would typically send the form data to your backend
+      }
+    } catch (e) {
+      if ((e as Error)?.message === "Expired verification code") {
+        setError(
+          "The verification code has expired. Please request a new code.",
+        );
+        setResendCooldown(0);
+        formData.otp = ["", "", "", "", "", ""];
+      }
+      setError((e as Error)?.message ?? "An error occurred");
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleResendOTP = () => {
+  const handleResendOTP = async () => {
     setAttempt((prev) => prev + 1);
-    otp.mutate({ phone: "+523313415550" });
+    if (!id) {
+      return toast.error("Invalid transfer ID");
+    }
+    const otp = await generateOTP.mutateAsync({
+      transferId: String(id),
+      phoneNumber: "+523313415550",
+    });
+    toast.success(`OTP ${otp} sent to ${phoneNumber}`);
     setResendCooldown(90);
     // Simulated OTP resend logic
     console.log("Resending OTP...");
@@ -362,29 +413,31 @@ export default function Component() {
     }, 1000);
   };
 
-  const handlePhoneCall = () => {
-    setCallRequested(true);
-    // Simulated phone call logic
-    console.log("Requesting phone call...");
-  };
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-lg">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-2xl font-bold">
-              {step === 0 ? "Verify Phone Number" : "Withdrawal Details"}
+              {step === 0
+                ? "Verify OTP"
+                : step === 3
+                  ? "Transaction Confirmation"
+                  : "Withdrawal Details"}
             </CardTitle>
-            <div className="flex items-center text-sm font-medium">
-              <Clock className="mr-2 h-4 w-4" />
-              Time left: {formatTime(timeLeft)}
-            </div>
+            {step > 0 && (
+              <div className="flex items-center text-sm font-medium">
+                <Clock className="mr-2 h-4 w-4" />
+                Time left: {formatTime(timeLeft)}
+              </div>
+            )}
           </div>
           <CardDescription>
             {step === 0
-              ? "You have a pending transfer. This transfer is locked to the phone number below. Please verify your phone number to continue."
-              : "Choose your withdrawal method and enter the required information"}
+              ? "You have a pending transfer. Please enter the OTP sent to your phone to proceed."
+              : step === 3
+                ? "Your transaction has been processed successfully."
+                : "Choose your withdrawal method and enter the required information"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -624,6 +677,73 @@ export default function Component() {
                 </div>
               </div>
             )}
+            {step === 3 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-center">
+                  <CheckCircle className="h-16 w-16 text-green-500" />
+                </div>
+                <h3 className="text-center text-lg font-semibold">
+                  Transaction Successful
+                </h3>
+                <div className="rounded-lg bg-gray-100 p-4">
+                  <p className="text-sm text-gray-600">Transaction ID:</p>
+                  <p className="font-medium">{String(id)}</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600">Withdrawal Method:</p>
+                  <p className="font-medium">
+                    {formData.withdrawalMethod === "bank"
+                      ? "Bank Transfer"
+                      : formData.withdrawalMethod === "cash"
+                        ? "Cash Pickup"
+                        : "Freelii Wallet"}
+                  </p>
+                </div>
+                {formData.withdrawalMethod !== "wallet" && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600">Amount:</p>
+                    <p className="font-medium">{`${formData.amount} ${formData.currency}`}</p>
+                  </div>
+                )}
+                {formData.withdrawalMethod === "bank" && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600">Bank Details:</p>
+                    <p className="font-medium">{formData.accountHolder}</p>
+                    <p className="text-sm">{formData.country}</p>
+                    {formData.accountNumber && (
+                      <p className="text-sm">
+                        Account: {formData.accountNumber}
+                      </p>
+                    )}
+                    {formData.routingNumber && (
+                      <p className="text-sm">
+                        Routing: {formData.routingNumber}
+                      </p>
+                    )}
+                    {formData.sortCode && (
+                      <p className="text-sm">Sort Code: {formData.sortCode}</p>
+                    )}
+                    {formData.iban && (
+                      <p className="text-sm">IBAN: {formData.iban}</p>
+                    )}
+                  </div>
+                )}
+                {formData.withdrawalMethod === "cash" && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600">Pickup Location:</p>
+                    <p className="font-medium">{formData.cashPickupLocation}</p>
+                  </div>
+                )}
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Important</AlertTitle>
+                  <AlertDescription>
+                    Please save this transaction ID for your records. You may
+                    need it for any future inquiries.
+                  </AlertDescription>
+                </Alert>
+              </div>
+            )}
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
@@ -634,7 +754,7 @@ export default function Component() {
           </form>
         </CardContent>
         <CardFooter className="flex justify-between">
-          {step > 0 && (
+          {step > 0 && step < 3 && (
             <Button
               variant="outline"
               onClick={() => setStep(step - 1)}
@@ -644,29 +764,31 @@ export default function Component() {
               Back
             </Button>
           )}
-          <Button
-            className={step === 0 ? "w-full" : "ml-4 flex-1"}
-            onClick={handleSubmit}
-            disabled={isExpired || isLoading}
-          >
-            {isLoading ? (
-              <>
-                <span className="mr-2 animate-spin">⏳</span>
-                Verifying...
-              </>
-            ) : (
-              <>
-                {step === 0
-                  ? "Verify Phone Number"
-                  : step === 2
-                    ? formData.withdrawalMethod === "wallet"
-                      ? "Keep in Wallet"
-                      : "Submit Withdrawal Request"
-                    : "Next"}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </>
-            )}
-          </Button>
+          {step < 3 && (
+            <Button
+              className={step === 0 ? "w-full" : "ml-4 flex-1"}
+              onClick={handleSubmit}
+              disabled={isExpired || isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <span className="mr-2 animate-spin">⏳</span>
+                  {step === 2 ? "Processing..." : "Verifying..."}
+                </>
+              ) : (
+                <>
+                  {step === 0
+                    ? "Verify OTP"
+                    : step === 2
+                      ? formData.withdrawalMethod === "wallet"
+                        ? "Keep in Wallet"
+                        : "Submit Withdrawal Request"
+                      : "Next"}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </div>

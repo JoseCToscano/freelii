@@ -12,6 +12,15 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
+    ANCHOR_API_BASE_URL: z.string().url(),
+    ANCHOR_API_TOKEN: z.string(),
+    ESCROW_CONTRACT_ADDRESS: z.string(),
+    RPC_URL: z.string().url(),
+    FREELII_DISTRIBUTOR_PUBLIC_KEY: z.string(),
+    FREELI_DISTRIBUTOR_SECRET_KEY: z.string(),
+    STELLAR_HORIZON_URL: z.string().url(),
+    NATIVE_CONTRACT_ID: z.string(),
+    USDC_SAC: z.string(),
   },
 
   /**
@@ -31,6 +40,15 @@ export const env = createEnv({
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
     TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
+    ANCHOR_API_BASE_URL: process.env.ANCHOR_API_BASE_URL,
+    ANCHOR_API_TOKEN: process.env.ANCHOR_API_TOKEN,
+    ESCROW_CONTRACT_ADDRESS: process.env.ESCROW_CONTRACT_ADDRESS,
+    RPC_URL: process.env.RPC_URL,
+    FREELII_DISTRIBUTOR_PUBLIC_KEY: process.env.FREELII_DISTRIBUTOR_PUBLIC_KEY,
+    FREELI_DISTRIBUTOR_SECRET_KEY: process.env.FREELI_DISTRIBUTOR_SECRET_KEY,
+    STELLAR_HORIZON_URL: process.env.STELLAR_HORIZON_URL,
+    NATIVE_CONTRACT_ID: process.env.NATIVE_CONTRACT_ID,
+    USDC_SAC: process.env.USDC_SAC,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
