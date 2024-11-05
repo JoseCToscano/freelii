@@ -49,7 +49,6 @@ const KYCForm: FC = () => {
   }, [searchParams]);
 
   // tRPC handlers
-  const kycFields = api.stellar.getSep31SenderKYCFields.useQuery();
   const putKyc = api.stellar.kyc.useMutation({
     onError: ClientTRPCErrorHandler,
   });

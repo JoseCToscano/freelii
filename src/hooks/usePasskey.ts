@@ -85,7 +85,7 @@ export const usePasskey = (phoneNumber: string) => {
 
   const sign = async (xdr: string): Promise<string> => {
     console.log("will sign,", keyId);
-    const signedXDR = await account.sign(xdr, { keyId });
+    const signedXDR = await account.sign(xdr, { keyId: String(keyId) });
     console.log("signed xdr", typeof signedXDR, signedXDR);
     return signedXDR.toXDR();
   };

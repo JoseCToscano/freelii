@@ -1,9 +1,5 @@
 import axios from "axios";
 import { StellarAnchorService } from "~/server/services/stellar/StellarAnchorService";
-import { Sep10 } from "~/server/services/stellar/Sep10";
-import { env } from "~/env";
-import { Keypair, TransactionBuilder } from "@stellar/stellar-sdk";
-import { Sep12 } from "~/server/services/stellar/Sep12";
 
 interface SEP31Info {
   receive: Record<
@@ -68,57 +64,6 @@ export class Sep31 extends StellarAnchorService {
     } catch (e) {
       if (e instanceof Error) {
         throw new Error(`Error getting SEP-31 info: ${e.message}`);
-      } else {
-        throw new Error("An unknown error occurred");
-      }
-    }
-  }
-
-  async authenticateSender(): Promise<string> {
-    try {
-      // const keypair = Keypair.fromSecret(env.FREELI_DISTRIBUTOR_SECRET_KEY);
-      const keypair = Keypair.random();
-      const sep10 = new Sep10(this.homeDomain);
-      const { network_passphrase, transaction } =
-        await sep10.getChallengeTransaction(keypair.publicKey());
-      const transactionXDR = TransactionBuilder.fromXDR(
-        transaction,
-        network_passphrase,
-      );
-      transactionXDR.sign(keypair);
-      const xdr = transactionXDR.toXDR();
-      const token = await sep10.submitChallengeTransaction(xdr);
-      this.authToken = token;
-    } catch (e) {
-      if (e instanceof Error) {
-        throw new Error(`Error authenticating Sender: ${e.message}`);
-      } else {
-        throw new Error("An unknown error occurred");
-      }
-    }
-  }
-
-  async getKYCFields(type: "sender" | "receiver") {
-    try {
-      let token = "";
-      if (!this.authToken) {
-        token = await this.authenticateSender();
-      }
-
-      // Fetch what Auth is Required
-      const info = await this.getSep31Fields();
-      // senderAuth = info.receive[asset].sep12.sender.types;
-
-      const sep12 = new Sep12(this.homeDomain);
-      const fields = await sep12.getSep12Fields({
-        authToken: this.authToken ?? token,
-        params: { type: `sep31-${type}` },
-      });
-
-      return fields;
-    } catch (e) {
-      if (e instanceof Error) {
-        throw new Error(`Error requesting KYC info: ${e.message}`);
       } else {
         throw new Error("An unknown error occurred");
       }

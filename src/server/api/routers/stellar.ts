@@ -54,10 +54,7 @@ export const stellarRouter = createTRPCRouter({
       console.log("token is:", token);
       return token;
     }),
-  getSep31SenderKYCFields: publicProcedure.query(async () => {
-    const sep31 = new Sep31("testanchor.stellar.org");
-    return sep31.getKYCFields("sender");
-  }),
+
   saveSigner: publicProcedure
     .input(
       z.object({
@@ -108,20 +105,20 @@ export const stellarRouter = createTRPCRouter({
       });
     }),
 
-  // send: publicProcedure
-  //   .input(z.object({ xdr: z.string() }))
-  //   .mutation(async ({ input }) => {
-  //     try {
-  //       const result = await account.send(input.xdr);
-  //       return {
-  //         success: true,
-  //         result,
-  //       };
-  //     } catch (e) {
-  //       // This will throw a TRPCError with the appropriate message
-  //       handleHorizonServerError(e);
-  //     }
-  //   }),
+  send: publicProcedure
+    .input(z.object({ xdr: z.string() }))
+    .mutation(async ({ input }) => {
+      try {
+        const result = (await account.send(input.xdr)) as never;
+        return {
+          success: true,
+          result,
+        };
+      } catch (e) {
+        // This will throw a TRPCError with the appropriate message
+        handleHorizonServerError(e);
+      }
+    }),
   deposit: publicProcedure
     .input(z.object({ transferId: z.string() }))
     .mutation(async ({ input, ctx }) => {
@@ -155,7 +152,7 @@ export const stellarRouter = createTRPCRouter({
             destination_asset:
               "stellar:SRT:GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B",
             source_asset: "iso4217:USD",
-            amount: transfer.amount,
+            amount: Number(transfer.amount),
             account: authSession?.publicKey ?? "",
             type: "bank_account",
           },
@@ -165,7 +162,7 @@ export const stellarRouter = createTRPCRouter({
           data: {
             amount: transfer.amount,
             transferId: input.transferId,
-            userId: authSession?.userId,
+            userId: Number(authSession?.userId),
             sep6Id: deposit.id,
             destinationAsset:
               "stellar:SRT:GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B",
@@ -208,7 +205,7 @@ export const stellarRouter = createTRPCRouter({
           });
         }
         const authSession = await ctx.db.authSession.findUnique({
-          where: { id: transfer.receiverAuthSessionId },
+          where: { id: Number(transfer.receiverAuthSessionId) },
         });
 
         const sep6 = new Sep6("testanchor.stellar.org");
@@ -218,11 +215,11 @@ export const stellarRouter = createTRPCRouter({
             source_asset:
               "stellar:SRT:GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B",
             destination_asset: "iso4217:USD",
-            amount: transfer.amount,
+            amount: Number(transfer.amount),
             account: authSession?.publicKey ?? "",
             type: "bank_account",
             dest: "12345",
-            dest_extra: String(transfer.transferId),
+            dest_extra: String(transfer.id),
           },
         });
 
@@ -230,8 +227,14 @@ export const stellarRouter = createTRPCRouter({
           data: {
             amount: transfer.amount,
             transferId: input.transferId,
-            userId: authSession?.userId,
+            userId: Number(authSession?.userId),
             sep6Id: withdraw.id,
+            destinationAsset: "iso4217:USD",
+            sourceAsset:
+              "stellar:SRT:GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B",
+            type: "bank_account",
+            account_number: "12345",
+            roting_number: String(transfer.id),
           },
         });
 
@@ -255,8 +258,8 @@ export const stellarRouter = createTRPCRouter({
           last_name: z.string().optional(),
           email_address: z.string().optional(),
           // file
-          photo_id_front: z.object().optional(),
-          photo_id_back: z.object().optional(),
+          photo_id_front: z.string().optional(),
+          photo_id_back: z.string().optional(),
           bank_number: z.string().optional(),
           bank_account_number: z.string().optional(),
         }),
@@ -302,7 +305,7 @@ export const stellarRouter = createTRPCRouter({
 
       const sep12 = new Sep12("testanchor.stellar.org");
       const { id } = await sep12.putSep12Fields({
-        authToken: authSession.token,
+        authToken: String(authSession.token),
         fields: input.fields,
       });
 
@@ -367,7 +370,7 @@ export const stellarRouter = createTRPCRouter({
 
       const sep12 = new Sep12("testanchor.stellar.org");
       const { url, config } = await sep12.getKYCRequestConfigForFiles({
-        authToken: authSession.token,
+        authToken: String(authSession.token),
       });
 
       return { url, config };

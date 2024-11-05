@@ -1,7 +1,7 @@
 import axios from "axios";
 import { StellarAnchorService } from "~/server/services/stellar/StellarAnchorService";
 
-interface KYCSession {
+export interface KYCSession {
   id: string;
   provided_fields: Partial<Sep12Fields>;
   fields: Partial<Sep12Fields>;
@@ -78,21 +78,17 @@ export class Sep12 extends StellarAnchorService {
     authToken: string;
     params?: { type?: string };
   }): Promise<KYCSession> {
-    try {
-      const kycServer = await this.getKycServer();
+    const kycServer = await this.getKycServer();
 
-      const res = await axios.get<KYCSession>(`${kycServer}/customer`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-        params: params ?? {},
-      });
-      console.log("res", res.data);
-      return res.data;
-    } catch (e) {
-      console.error(e);
-    }
+    const res = await axios.get<KYCSession>(`${kycServer}/customer`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+      params: params ?? {},
+    });
+    console.log("res", res.data);
+    return res.data;
   }
 
   /**

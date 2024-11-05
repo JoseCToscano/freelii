@@ -83,14 +83,13 @@ export default function Component() {
     { icon: Zap, title: "Lightning Fast Transfer" },
   ];
 
-  const startAuthSession = async (): Promise<string> => {
+  const startAuthSession = async (): Promise<string | number> => {
     try {
       const keypair = Keypair.random();
       const { id: sessionId } = await startAuth.mutateAsync({
-        userId: user?.id,
+        userId: Number(user?.id),
         publicKey: keypair.publicKey(),
       });
-      console.log("sessionId", sessionId);
 
       const { transaction, network_passphrase } =
         await sep10Challenge.mutateAsync({
