@@ -39,6 +39,8 @@ import ExpandingArrow from "~/components/ui/expanding-arrow";
 import { User } from "@prisma/client";
 import { useParams } from "next/navigation";
 
+const USE_PASSKEY = false;
+
 export default function Component() {
   const { transferId } = useParams();
   const [step, setStep] = useState(0);
@@ -83,11 +85,15 @@ export default function Component() {
     { icon: Zap, title: "Lightning Fast Transfer" },
   ];
 
-  const startAuthSession = async (): Promise<string | number> => {
+  const startAuthSession = async (receivedId?: number) => {
     try {
+      const userId = user?.id ? Number(user?.id) : receivedId;
+      if (!userId) {
+        throw new Error("Invalid user id");
+      }
       const keypair = Keypair.random();
       const { id: sessionId } = await startAuth.mutateAsync({
-        userId: Number(user?.id),
+        userId: Number(userId),
         publicKey: keypair.publicKey(),
       });
 
@@ -110,9 +116,9 @@ export default function Component() {
         authSessionId: sessionId,
         transferId: transferId as string,
       });
-
+      // Redirect to next page
+      window.location.href = `/kyc/${String(transferId)}`;
       return sessionId;
-      // TODO: Save Token
     } catch (e) {
       console.error(e);
       toast.error((e as Error)?.message ?? "Failed to start auth session");
@@ -129,9 +135,7 @@ export default function Component() {
     if (contractId) {
       setContract(contractId);
       console.log("contractId", contractId);
-      await startAuthSession();
-      window.location.href = `/kyc/${String(transferId)}`;
-      // Redirect to next page
+      return startAuthSession();
     }
     setIsLoading(false);
   };
@@ -189,9 +193,16 @@ export default function Component() {
         setUser(userRes);
         toast.success("Phone number verified successfully");
         setIsLoading(false);
-        setStep(3);
+        if (USE_PASSKEY) {
+          setStep(3);
+        } else {
+          console.log("userRes", userRes);
+          return startAuthSession(userRes.id);
+        }
       }
     } catch (e) {
+      setIsLoading(false);
+      toast((e as Error)?.message ?? "Failed to verify phone number");
       setIsLoading(false);
     }
   };
@@ -345,7 +356,7 @@ export default function Component() {
                   variant="outline"
                   onClick={handleUpdatePhone}
                 >
-                  Update Phone Number
+                  Update Number
                   <PhoneCall className="ml-2 h-4 w-4" />
                 </Button>
                 <Button
@@ -396,7 +407,7 @@ export default function Component() {
               className="w-full"
               onClick={handleUpdatePhone}
             >
-              Update Phone Number
+              Update Number
               <PhoneCall className="ml-2 h-4 w-4" />
             </Button>
           </div>

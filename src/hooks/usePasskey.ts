@@ -42,14 +42,11 @@ export const usePasskey = (phoneNumber: string) => {
         setKeyId(keyId_base64);
         setContractId(cid);
 
-        console.log("funding wallet");
         await saveSigner.mutateAsync({
           contractId: cid,
           signerId: keyId_base64,
           phone: phoneNumber,
         });
-        // await fundWallet(cid);
-        console.log("funded wallet");
         return cid;
       }
       throw new Error("Failed to create Stellar passkey");

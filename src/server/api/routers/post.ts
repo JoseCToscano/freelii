@@ -79,7 +79,7 @@ export const postRouter = createTRPCRouter({
         },
       });
       if (!verification) {
-        throw new Error("Invalida or expired verification code");
+        throw new Error("Invalid or expired verification code");
       }
       await ctx.db.oTPVerification.update({
         where: {
