@@ -108,21 +108,20 @@ export const stellarRouter = createTRPCRouter({
       });
     }),
 
-  send: publicProcedure
-    .input(z.object({ xdr: z.string() }))
-    .mutation(async ({ input }) => {
-      try {
-        const result = await account.send(input.xdr);
-        console.log("Successfully sent XDR to Stellar network", result);
-        return {
-          success: true,
-          result,
-        };
-      } catch (e) {
-        // This will throw a TRPCError with the appropriate message
-        handleHorizonServerError(e);
-      }
-    }),
+  // send: publicProcedure
+  //   .input(z.object({ xdr: z.string() }))
+  //   .mutation(async ({ input }) => {
+  //     try {
+  //       const result = await account.send(input.xdr);
+  //       return {
+  //         success: true,
+  //         result,
+  //       };
+  //     } catch (e) {
+  //       // This will throw a TRPCError with the appropriate message
+  //       handleHorizonServerError(e);
+  //     }
+  //   }),
   deposit: publicProcedure
     .input(z.object({ transferId: z.string() }))
     .mutation(async ({ input, ctx }) => {
@@ -144,7 +143,7 @@ export const stellarRouter = createTRPCRouter({
         }
 
         const authSession = await ctx.db.authSession.findFirst({
-          where: { id: input.senderAuthSessionId },
+          where: { id: transfer.senderAuthSessionId },
         });
 
         const sep6 = new Sep6("testanchor.stellar.org");
@@ -209,7 +208,7 @@ export const stellarRouter = createTRPCRouter({
           });
         }
         const authSession = await ctx.db.authSession.findUnique({
-          where: { id: input.receiverAuthSessionId },
+          where: { id: transfer.receiverAuthSessionId },
         });
 
         const sep6 = new Sep6("testanchor.stellar.org");
@@ -222,8 +221,8 @@ export const stellarRouter = createTRPCRouter({
             amount: transfer.amount,
             account: authSession?.publicKey ?? "",
             type: "bank_account",
-            dest: input.dest,
-            dest_extra: input.transferId,
+            dest: "12345",
+            dest_extra: String(transfer.transferId),
           },
         });
 

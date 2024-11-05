@@ -272,7 +272,7 @@ export default function Component() {
                   $
                   {Number(formData.amount).toLocaleString("en-US", {
                     minimumFractionDigits: 2,
-                    maxFractionDigits: 2,
+                    maximumFractionDigits: 2,
                   })}{" "}
                   USD
                 </span>

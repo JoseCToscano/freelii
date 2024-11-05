@@ -34,11 +34,10 @@ interface IBank {
 }
 export default function Component() {
   const { transferId } = useParams();
-  const [depositData, setDepositData] = useState<IBank>(null);
 
   const transfer = api.stellar.getTransferData.useQuery(
     {
-      transferId,
+      transferId: String(transferId),
     },
     {
       enabled: !!transferId,
@@ -48,13 +47,12 @@ export default function Component() {
   const deposit = api.stellar.deposit.useMutation({
     onError: ClientTRPCErrorHandler,
     onSuccess: (data) => {
-      setDepositData(data);
       console.log(data);
     },
   });
 
   useEffect(() => {
-    if (transferId) {
+    if (transferId && typeof transferId === "string") {
       deposit.mutate({ transferId });
     }
   }, [transferId]);

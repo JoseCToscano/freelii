@@ -104,11 +104,11 @@ export default function Component() {
       });
       console.log("token", token, "sessionId", sessionId);
       await saveAuth.mutateAsync({
-        sessionId: sessionId as number,
+        sessionId: sessionId,
         token,
       });
       await linkSenderAuthSession.mutateAsync({
-        authSessionId: sessionId as number,
+        authSessionId: sessionId,
         transferId: transferId as string,
       });
 
@@ -131,7 +131,7 @@ export default function Component() {
       setContract(contractId);
       console.log("contractId", contractId);
       await startAuthSession();
-      window.location.href = `/kyc/${transferId}`;
+      window.location.href = `/kyc/${String(transferId)}`;
       // Redirect to next page
     }
     setIsLoading(false);

@@ -89,7 +89,7 @@ export class Sep12 extends StellarAnchorService {
         params: params ?? {},
       });
       console.log("res", res.data);
-      return res.data as KYCSession;
+      return res.data;
     } catch (e) {
       console.error(e);
     }

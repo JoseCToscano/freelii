@@ -28,7 +28,7 @@ export default function Component() {
 
   const transfer = api.stellar.getTransferData.useQuery(
     {
-      transferId,
+      transferId: String(transferId),
     },
     {
       enabled: !!transferId,

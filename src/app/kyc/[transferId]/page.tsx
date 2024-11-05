@@ -1,16 +1,7 @@
 "use client";
 
 import { useState, FC, useEffect } from "react";
-import {
-  ArrowRight,
-  ChevronLeft,
-  Upload,
-  User,
-  Mail,
-  CreditCard,
-  Building2,
-  AlertCircle,
-} from "lucide-react";
+import { ArrowRight, ChevronLeft, Upload, AlertCircle } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -56,8 +47,6 @@ const KYCForm: FC = () => {
       setSteps(["Personal Information", "Photo ID"]);
     }
   }, [searchParams]);
-
-  const isReceiver = searchParams.get("type") === "receiver";
 
   // tRPC handlers
   const kycFields = api.stellar.getSep31SenderKYCFields.useQuery();
@@ -112,17 +101,19 @@ const KYCForm: FC = () => {
       const sep12Id = await putKyc
         .mutateAsync({
           type: "sender",
-          transferId,
+          transferId: String(transferId),
           fields: stringFields,
         })
         .catch(() => setLoading(false));
       const { url, config } = await kycFileConfig.mutateAsync({
         type: "sender",
-        transferId,
+        transferId: String(transferId),
       });
       try {
         const formData = new FormData();
-        formData.append("id", sep12Id);
+        if (sep12Id) {
+          formData.append("id", sep12Id);
+        }
         if (photo_id_front) {
           formData.append("photo_id_front", photo_id_front);
         }
@@ -171,7 +162,6 @@ const KYCForm: FC = () => {
                     id="first_name"
                     name="first_name"
                     placeholder="John"
-                    icon={<User className="h-4 w-4 text-gray-500" />}
                     onChange={(e) => handleChange("first_name", e.target.value)}
                     value={formData.first_name}
                     required
@@ -183,7 +173,6 @@ const KYCForm: FC = () => {
                     id="last_name"
                     name="last_name"
                     placeholder="Doe"
-                    icon={<User className="h-4 w-4 text-gray-500" />}
                     onChange={(e) => handleChange("last_name", e.target.value)}
                     value={formData.last_name}
                     required
@@ -196,7 +185,6 @@ const KYCForm: FC = () => {
                     name="email_address"
                     type="email"
                     placeholder="john.doe@example.com"
-                    icon={<Mail className="h-4 w-4 text-gray-500" />}
                     onChange={(e) =>
                       handleChange("email_address", e.target.value)
                     }
@@ -216,7 +204,6 @@ const KYCForm: FC = () => {
                     id="bank_account_number"
                     name="bank_account_number"
                     placeholder="1234567890"
-                    icon={<CreditCard className="h-4 w-4 text-gray-500" />}
                     onChange={(e) =>
                       handleChange("bank_account_number", e.target.value)
                     }
@@ -230,7 +217,6 @@ const KYCForm: FC = () => {
                     id="bank_number"
                     name="bank_number"
                     placeholder="123456789"
-                    icon={<Building2 className="h-4 w-4 text-gray-500" />}
                     onChange={(e) =>
                       handleChange("bank_number", e.target.value)
                     }

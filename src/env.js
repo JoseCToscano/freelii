@@ -26,6 +26,7 @@ export const env = createEnv({
     LAUNCHETUBE_JWT: z.string(),
     MERCURY_JWT: z.string(),
     SRT_ASSET_ID: z.string(),
+    ENABLE_SMS: z.string(),
   },
 
   /**
@@ -68,6 +69,7 @@ export const env = createEnv({
     NEXT_PUBLIC_NATIVE_CONTRACT_ID: process.env.NEXT_PUBLIC_NATIVE_CONTRACT_ID,
     NEXT_PUBLIC_NETWORK_PASSPHRASE: process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE,
     SRT_ASSET_ID: process.env.SRT_ASSET_ID,
+    ENABLE_SMS: process.env.ENABLE_SMS,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

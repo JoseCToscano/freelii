@@ -2,6 +2,7 @@ import { z } from "zod";
 import { Twilio } from "twilio";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { env } from "~/env";
 
 async function sendSms(to: string, text: string) {
   const accountSid = "ACd5601360d5a7391df2f933682dcda442";
@@ -38,7 +39,9 @@ export const postRouter = createTRPCRouter({
         });
       }
       // TODO: Enable this
-      // await sendSms(input.phone, `Your Freeli OTP is: ${otp}`);
+      if (String(env.ENABLE_SMS) === "true") {
+        await sendSms(input.phone, `Your Freelii OTP is: ${otp}`);
+      }
       await ctx.db.oTPVerification.upsert({
         where: {
           userId: user.id,
