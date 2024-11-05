@@ -89,15 +89,15 @@ interface WebApp {
   headerColor: string;
   backgroundColor: string;
   isClosingConfirmationEnabled: boolean;
-  BackButton: any;
-  MainButton: any;
+  BackButton: never;
+  MainButton: never;
   BiometricManager: BiometricManager;
   HapticFeedback: HapticFeedback;
 
   ready(): void;
   close(): void;
-  onEvent(event: string, callback: (data: any) => void): void;
-  offEvent(event: string, callback: (data: any) => void): void;
+  onEvent(event: string, callback: (data: never) => void): void;
+  offEvent(event: string, callback: (data: never) => void): void;
   openLink(url: string): void;
   showScanQrPopup(params: { text?: string }): void;
 }
