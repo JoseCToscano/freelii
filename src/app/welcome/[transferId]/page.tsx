@@ -156,7 +156,7 @@ export default function Component() {
         toast.success("Verification code sent to your phone");
         setIsLoading(false);
         setStep(2);
-        setResendTimer(30); // Set initial resend timer
+        setResendTimer(59); // Set initial resend timer
       }
     } catch (e) {
       setIsLoading(false);
@@ -207,7 +207,7 @@ export default function Component() {
       setIsLoading(true);
       await newOtp.mutateAsync({ phone: phoneNumber });
       setIsLoading(false);
-      setResendTimer(30); // Reset resend timer
+      setResendTimer(59); // Reset resend timer
       setOtp(["", "", "", "", "", ""]);
     } catch (e) {
       setIsLoading(false);
@@ -334,7 +334,7 @@ export default function Component() {
                   </>
                 ) : (
                   <>
-                    Verify OTP
+                    Verify Phone Number
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </>
                 )}

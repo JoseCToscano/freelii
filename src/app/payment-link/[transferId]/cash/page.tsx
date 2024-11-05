@@ -38,7 +38,7 @@ export default function Component() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
+        <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-[#3390EC]">
             MoneyGram Cash Payment
           </CardTitle>
@@ -106,9 +106,9 @@ export default function Component() {
               <li>Keep your receipt as proof of payment</li>
             </ol>
           </div>
-          <div className="rounded-md border border-yellow-200 bg-yellow-50 p-3 text-sm">
-            <p className="font-semibold text-yellow-800">Important:</p>
-            <ul className="mt-1 list-inside list-disc space-y-1 text-yellow-700">
+          <div className="rounded-md border border-[#3390EC] bg-[#E7F3FF] p-3 text-sm">
+            <p className="font-semibold text-[#3390EC]">Important:</p>
+            <ul className="mt-1 list-inside list-disc space-y-1 text-gray-700">
               <li>MoneyGram locations may have different operating hours</li>
               <li>Bring a valid government-issued photo ID</li>
               <li>Fees may vary by location and payment amount</li>
@@ -119,10 +119,15 @@ export default function Component() {
           <Link href={`/payment-link/${String(transferId)}`}>
             <Button variant="outline">Back</Button>
           </Link>
-          <Button>
-            Find MoneyGram Location
-            <ArrowUpRight className="ml-2 h-4 w-4" />
-          </Button>
+          <Link
+            href="https://www.moneygram.com/intl/en/en-locator"
+            target="_blank"
+          >
+            <Button>
+              Find MoneyGram Location
+              <ArrowUpRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
         </CardFooter>
       </Card>
     </div>

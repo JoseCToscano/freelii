@@ -60,8 +60,8 @@ export default function Component() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold text-[#3390EC]">
             Complete Your Payment
           </CardTitle>
           <CardDescription>
@@ -170,12 +170,12 @@ export default function Component() {
             </div>
           </div>
           <Separator />
-          <div className="space-y-2">
-            <h3 className="flex items-center gap-2 font-semibold">
+          <div className="space-y-2 rounded-md border border-[#3390EC] bg-[#E7F3FF] p-3 text-sm">
+            <h3 className="flex items-center gap-2 font-semibold text-[#3390EC]">
               <Info className="h-4 w-4" />
               Instructions
             </h3>
-            <ol className="list-inside list-decimal space-y-2 text-sm">
+            <ol className="list-inside list-disc space-y-1 text-sm text-gray-700">
               <li>
                 Log in to your online banking or visit your local bank branch
               </li>
@@ -197,10 +197,12 @@ export default function Component() {
           <Link href={`/payment-link/${String(transferId)}`}>
             <Button variant="outline">Back</Button>
           </Link>
-          <Button>
-            I&#39;ve Made the Payment
-            <ArrowUpRight className="ml-2 h-4 w-4" />
-          </Button>
+          <Link href={`/payment-link/${String(transferId)}/confirm`}>
+            <Button>
+              I&#39;ve Made the Payment
+              <ArrowUpRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
         </CardFooter>
       </Card>
     </div>

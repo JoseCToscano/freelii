@@ -19,7 +19,6 @@ export const usePasskey = (phoneNumber: string) => {
 
   // Initialize tRPC mutation
   const { mutateAsync: sendTransaction, error } = api.stellar.send.useMutation({
-    onSuccess: () => toast.success("Successfully sent XDR to Stellar network"),
     onError: ClientTRPCErrorHandler,
   });
 

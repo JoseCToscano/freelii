@@ -54,12 +54,13 @@ export default function Component() {
 
   const countries = [
     { value: "us", label: "United States" },
-    { value: "ca", label: "Canada" },
+    { value: "ph", label: "Philippines" },
     { value: "mx", label: "Mexico" },
+    { value: "co", label: "Colombia" },
+    { value: "ca", label: "Canada" },
     { value: "gb", label: "United Kingdom" },
     { value: "fr", label: "France" },
     { value: "de", label: "Germany" },
-    { value: "jp", label: "Japan" },
     { value: "au", label: "Australia" },
     { value: "br", label: "Brazil" },
     { value: "in", label: "India" },
@@ -108,7 +109,7 @@ export default function Component() {
         toast.error("Failed to create transfer");
         return;
       }
-      toast.success("Transfer created successfully");
+      toast.success("Looking good! Just a few more steps to go.");
 
       window.location.href = `/welcome/${String(tx.id)}`;
     }
@@ -170,7 +171,7 @@ export default function Component() {
               ))}
             </div>
             <Button onClick={() => setStep(1)} className="w-full">
-              Start Transfer
+              Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
@@ -212,6 +213,9 @@ export default function Component() {
                 onChange={handleInputChange}
                 required
               />
+              <span className="ml-1 text-xs text-muted-foreground">
+                Just as it appears on their official ID
+              </span>
             </div>
             <div className="space-y-2">
               <Label htmlFor="phoneNumber">Recipient&#39;s Phone Number</Label>
@@ -224,6 +228,9 @@ export default function Component() {
                 onChange={handleInputChange}
                 required
               />
+              <span className="ml-1 text-xs text-muted-foreground">
+                Make sure to include the country code (e.g. +63 for Philippines)
+              </span>
             </div>
           </div>
         );
@@ -231,16 +238,20 @@ export default function Component() {
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount to Send</Label>
+              <Label htmlFor="amount">Amount to Send (USD)</Label>
               <Input
                 id="amount"
                 name="amount"
                 type="number"
-                placeholder="Enter amount"
+                placeholder="Enter amount in USD"
                 value={formData.amount}
                 onChange={handleInputChange}
                 required
               />
+              <span className="ml-1 text-xs text-muted-foreground">
+                Don&#39;t worry, funds will be converted to the recipient&#39;s
+                local currency
+              </span>
             </div>
           </div>
         );
@@ -366,7 +377,7 @@ export default function Component() {
                       </>
                     ) : (
                       <>
-                        Confirm and Send
+                        Continue
                         <Check className="ml-2 h-4 w-4" />
                       </>
                     )}
