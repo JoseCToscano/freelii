@@ -21,6 +21,11 @@ export const env = createEnv({
     STELLAR_HORIZON_URL: z.string().url(),
     NATIVE_CONTRACT_ID: z.string(),
     USDC_SAC: z.string(),
+    LAUNCHTUBE_URL: z.string().url(),
+    MERCURYT_URL: z.string().url(),
+    LAUNCHETUBE_JWT: z.string(),
+    MERCURY_JWT: z.string(),
+    SRT_ASSET_ID: z.string(),
   },
 
   /**
@@ -29,6 +34,10 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
+    NEXT_PUBLIC_RPC_URL: z.string().url(),
+    NEXT_PUBLIC_FACTORY_CONTRACT_ID: z.string(),
+    NEXT_PUBLIC_NATIVE_CONTRACT_ID: z.string(),
+    NEXT_PUBLIC_NETWORK_PASSPHRASE: z.string(),
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
   },
 
@@ -49,6 +58,16 @@ export const env = createEnv({
     STELLAR_HORIZON_URL: process.env.STELLAR_HORIZON_URL,
     NATIVE_CONTRACT_ID: process.env.NATIVE_CONTRACT_ID,
     USDC_SAC: process.env.USDC_SAC,
+    LAUNCHTUBE_URL: process.env.LAUNCHTUBE_URL,
+    MERCURYT_URL: process.env.MERCURYT_URL,
+    LAUNCHETUBE_JWT: process.env.LAUNCHETUBE_JWT,
+    MERCURY_JWT: process.env.MERCURY_JWT,
+    NEXT_PUBLIC_RPC_URL: process.env.NEXT_PUBLIC_RPC_URL,
+    NEXT_PUBLIC_FACTORY_CONTRACT_ID:
+      process.env.NEXT_PUBLIC_FACTORY_CONTRACT_ID,
+    NEXT_PUBLIC_NATIVE_CONTRACT_ID: process.env.NEXT_PUBLIC_NATIVE_CONTRACT_ID,
+    NEXT_PUBLIC_NETWORK_PASSPHRASE: process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE,
+    SRT_ASSET_ID: process.env.SRT_ASSET_ID,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

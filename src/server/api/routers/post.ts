@@ -23,10 +23,70 @@ async function sendSms(to: string, text: string) {
 export const postRouter = createTRPCRouter({
   otp: publicProcedure
     .input(z.object({ phone: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const otp = Math.floor(100000 + Math.random() * 900000);
-      await sendSms(input.phone, `Your Freeli OTP is: ${otp}`);
+      let user = await ctx.db.user.findUnique({
+        where: {
+          phone: input.phone,
+        },
+      });
+      if (!user) {
+        user = await ctx.db.user.create({
+          data: {
+            phone: input.phone,
+          },
+        });
+      }
+      // TODO: Enable this
+      // await sendSms(input.phone, `Your Freeli OTP is: ${otp}`);
+      await ctx.db.oTPVerification.upsert({
+        where: {
+          userId: user.id,
+        },
+        create: {
+          userId: user.id,
+          otpCode: String(otp),
+          verified: false,
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+        },
+        update: {
+          otpCode: String(otp),
+          verified: false,
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+        },
+      });
       return otp;
+    }),
+  verifyOtp: publicProcedure
+    .input(z.object({ phone: z.string(), otp: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const verification = await ctx.db.oTPVerification.findFirst({
+        where: {
+          user: {
+            phone: input.phone,
+          },
+          otpCode: input.otp,
+          verified: false,
+          expiresAt: {
+            gte: new Date(),
+          },
+        },
+        include: {
+          user: true,
+        },
+      });
+      if (!verification) {
+        throw new Error("Invalida or expired verification code");
+      }
+      await ctx.db.oTPVerification.update({
+        where: {
+          id: verification.id,
+        },
+        data: {
+          verified: true,
+        },
+      });
+      return verification.user;
     }),
   hello: publicProcedure
     .input(z.object({ text: z.string() }))

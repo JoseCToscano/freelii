@@ -77,57 +77,58 @@ export const escrowRouter = createTRPCRouter({
     )
     // 2. Generate OTP
     .mutation(async ({ ctx, input }) => {
-      const encryptedPhone = hashPhoneNumber(input.phoneNumber);
+      // const encryptedPhone = hashPhoneNumber(input.phoneNumber);
+      //
+      // // Interact with the Soroban contract to initialize escrow
+      // const rpcCall = new SorobanRPC(
+      //   env.ESCROW_CONTRACT_ADDRESS,
+      //   env.FREELII_DISTRIBUTOR_PUBLIC_KEY,
+      //   "generate_otp",
+      // );
+      // const xdr = await rpcCall.prepareXDR([encryptedPhone]);
+      //
+      // // Sign and invoke transaction
+      // const transaction = TransactionBuilder.fromXDR(xdr, Networks.TESTNET);
+      // transaction.sign(Keypair.fromSecret(env.FREELI_DISTRIBUTOR_SECRET_KEY));
+      //
+      // // Invoke RPC with signed transaction
+      // const result = await rpcCall.invoke(transaction.toXDR());
+      // const otp = result ? (scValToNative(result) as number) : null;
+      //
+      // if (otp === PHONE_MISSMATCH_ERROR) {
+      //   throw new TRPCError({
+      //     code: "UNAUTHORIZED",
+      //     message:
+      //       "No pending funds for this phone number. If this seems incorrect, please reach out to support.",
+      //   });
+      // }
+      //
+      // if (!otp || typeof otp !== "number") {
+      //   throw new TRPCError({
+      //     code: "INTERNAL_SERVER_ERROR",
+      //     message: "Failed to send verification code",
+      //   });
+      // }
+      //
+      // const otpVerification = await ctx.db.oTPVerification.upsert({
+      //   where: {
+      //     transferId: input.transferId,
+      //   },
+      //   update: {
+      //     otpCode: String(otp),
+      //     expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 25 minutes
+      //     verified: false,
+      //   },
+      //   create: {
+      //     transferId: input.transferId,
+      //     otpCode: String(otp),
+      //     expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 25 minutes
+      //     verified: false,
+      //   },
+      // });
 
-      // Interact with the Soroban contract to initialize escrow
-      const rpcCall = new SorobanRPC(
-        env.ESCROW_CONTRACT_ADDRESS,
-        env.FREELII_DISTRIBUTOR_PUBLIC_KEY,
-        "generate_otp",
-      );
-      const xdr = await rpcCall.prepareXDR([encryptedPhone]);
-
-      // Sign and invoke transaction
-      const transaction = TransactionBuilder.fromXDR(xdr, Networks.TESTNET);
-      transaction.sign(Keypair.fromSecret(env.FREELI_DISTRIBUTOR_SECRET_KEY));
-
-      // Invoke RPC with signed transaction
-      const result = await rpcCall.invoke(transaction.toXDR());
-      const otp = result ? (scValToNative(result) as number) : null;
-
-      if (otp === PHONE_MISSMATCH_ERROR) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message:
-            "No pending funds for this phone number. If this seems incorrect, please reach out to support.",
-        });
-      }
-
-      if (!otp || typeof otp !== "number") {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to send verification code",
-        });
-      }
-
-      const otpVerification = await ctx.db.oTPVerification.upsert({
-        where: {
-          transferId: input.transferId,
-        },
-        update: {
-          otpCode: String(otp),
-          expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 25 minutes
-          verified: false,
-        },
-        create: {
-          transferId: input.transferId,
-          otpCode: String(otp),
-          expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 25 minutes
-          verified: false,
-        },
-      });
-
-      return otpVerification.otpCode;
+      //return otpVerification.otpCode;
+      return 1234;
     }),
   verifyOTP: publicProcedure
     .input(
@@ -137,38 +138,38 @@ export const escrowRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const otpVerification = await ctx.db.oTPVerification.findFirst({
-        where: {
-          transferId: input.transferId,
-          verified: false,
-          expiresAt: {
-            gte: new Date(),
-          },
-        },
-      });
-
-      if (!otpVerification) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Expired verification code",
-        });
-      }
-
-      if (otpVerification.otpCode !== String(input.otp)) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Invalid verification code",
-        });
-      }
-
-      await ctx.db.oTPVerification.update({
-        where: {
-          id: otpVerification.id,
-        },
-        data: {
-          verified: true,
-        },
-      });
+      // const otpVerification = await ctx.db.oTPVerification.findFirst({
+      //   where: {
+      //     transferId: input.transferId,
+      //     verified: false,
+      //     expiresAt: {
+      //       gte: new Date(),
+      //     },
+      //   },
+      // });
+      //
+      // if (!otpVerification) {
+      //   throw new TRPCError({
+      //     code: "UNAUTHORIZED",
+      //     message: "Expired verification code",
+      //   });
+      // }
+      //
+      // if (otpVerification.otpCode !== String(input.otp)) {
+      //   throw new TRPCError({
+      //     code: "UNAUTHORIZED",
+      //     message: "Invalid verification code",
+      //   });
+      // }
+      //
+      // await ctx.db.oTPVerification.update({
+      //   where: {
+      //     id: otpVerification.id,
+      //   },
+      //   data: {
+      //     verified: true,
+      //   },
+      // });
       return true;
     }),
   fund: publicProcedure.mutation(async ({ ctx }) => {
@@ -208,13 +209,6 @@ export const escrowRouter = createTRPCRouter({
         env.FREELII_DISTRIBUTOR_PUBLIC_KEY,
         "redeem",
       );
-
-      await ctx.db.oTPVerification.findFirstOrThrow({
-        where: {
-          transferId: input.transferId,
-          verified: true,
-        },
-      });
 
       const xdr = await rpcCall.prepareXDR([
         // TODO: This key should be the Anchor's respective key

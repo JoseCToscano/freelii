@@ -82,7 +82,6 @@ export const transfersRouter = createTRPCRouter({
         recipientPhone: z.string(),
         recipientName: z.string(),
         currency: z.string(),
-        senderId: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -93,7 +92,6 @@ export const transfersRouter = createTRPCRouter({
         recipientName: input.recipientName,
         currency: input.currency as Currency,
         currencyType: CurrencyType.FIAT,
-        senderId: input.senderId,
         status: TransferStatus.PENDING,
       });
     }),

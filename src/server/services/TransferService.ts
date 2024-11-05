@@ -11,7 +11,6 @@ interface INewTransfer {
   recipientName: string;
   currency: Currency;
   currencyType: CurrencyType;
-  senderId: number;
   status: TransferStatus;
 }
 
@@ -97,7 +96,6 @@ export class TransferService {
         amount: dto.amount,
         currency: dto.currency,
         currencyType: dto.currencyType as CurrencyType,
-        senderId: dto.senderId,
         recipientPhone: dto.recipientPhone,
         recipientName: dto.recipientName,
         status: dto.status,

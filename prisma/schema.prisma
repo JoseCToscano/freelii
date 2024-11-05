@@ -12,33 +12,117 @@ datasource db {
 
 // User model
 model User {
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-  id               Int        @id @default(autoincrement())
-  telegramId       Int?
-  telegramUsername String?
-  firstName        String
-  middleName       String?
-  lastName         String?
-  phone            String     @unique
-  transfers        Transfer[] @relation("UserTransfers")
+  id                Int                 @id @default(autoincrement())
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  telegramId        Int?
+  telegramUsername  String?
+  firstName         String?
+  middleName        String?
+  lastName          String?
+  assignedGAddress  String?
+  passkeyCAddress   String?
+  passkeyKey        String?
+  phone             String              @unique
+  transfers         Transfer[]          @relation("UserTransfers")
+  AuthSession       AuthSession[]
+  OTPVerification   OTPVerification?
+  KYC               KYC[]
+  HostedDeposits    HostedDeposits[]
+  HostedWithdrawals HostedWithdrawals[]
+
+  @@index([telegramId], name: "telegram_idx")
+  @@index([phone], name: "phone_idx")
+  @@index([telegramUsername], name: "telegram_username_idx")
+  @@index([assignedGAddress], name: "assigned_g_address_idx")
+  @@index([passkeyCAddress], name: "passkey_c_address_idx")
+}
+
+model AuthSession {
+  id                Int                 @id @default(autoincrement())
+  userId            Int
+  user              User                @relation(fields: [userId], references: [id])
+  token             String?
+  publicKey         String
+  expiresAt         DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  KYC               KYC[]
+  HostedDeposits    HostedDeposits[]
+  HostedWithdrawals HostedWithdrawals[]
+
+  @@index([userId], name: "user_idx")
+}
+
+model KYC {
+  id            Int         @id @default(autoincrement())
+  userId        Int
+  user          User        @relation(fields: [userId], references: [id])
+  authSessionId Int
+  authSession   AuthSession @relation(fields: [authSessionId], references: [id])
+  status        String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  sep12Id       String?
+
+  @@index([userId], name: "kyc_user_idx")
+}
+
+model HostedDeposits {
+  id               Int          @id @default(autoincrement())
+  userId           Int
+  user             User         @relation(fields: [userId], references: [id])
+  amount           Decimal
+  destinationAsset String
+  sourceAsset      String
+  type             String
+  transferId       String
+  transfer         Transfer     @relation(fields: [transferId], references: [id])
+  AuthSession      AuthSession? @relation(fields: [authSessionId], references: [id])
+  authSessionId    Int?
+  sep6Id           String?
+
+  @@index([userId], name: "hosted_deposits_user_idx")
+  @@index([transferId], name: "hosted_deposits_transfer_idx")
+}
+
+model HostedWithdrawals {
+  id               Int          @id @default(autoincrement())
+  userId           Int
+  user             User         @relation(fields: [userId], references: [id])
+  amount           Decimal
+  destinationAsset String
+  sourceAsset      String
+  type             String
+  account_number   String
+  roting_number    String
+  transferId       String
+  transfer         Transfer     @relation(fields: [transferId], references: [id])
+  AuthSession      AuthSession? @relation(fields: [authSessionId], references: [id])
+  authSessionId    Int?
+  sep6Id           String?
+
+  @@index([userId], name: "hosted_withdrawals_user_idx")
+  @@index([transferId], name: "hosted_withdrawals_transfer_idx")
 }
 
 // Transfer model
 model Transfer {
-  createdAt              DateTime         @default(now())
-  updatedAt              DateTime         @updatedAt
-  id                     String           @id @default(cuid())
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  id                     String              @id @default(cuid())
   amount                 Decimal
   currency               Currency
   currencyType           CurrencyType
-  senderId               Int
-  sender                 User             @relation("UserTransfers", fields: [senderId], references: [id])
-  status                 TransferStatus   @default(PENDING)
-  OTPVerification        OTPVerification?
+  senderId               Int?
+  sender                 User?               @relation("UserTransfers", fields: [senderId], references: [id])
+  status                 TransferStatus      @default(PENDING)
+  OTPVerification        OTPVerification?    @relation(fields: [oTPVerificationId], references: [id])
   recipientPhone         String
   recipientName          String
   recipientCountry       String?
+  senderAuthSessionId    Int?
+  receiverAuthSessionId  Int?
   // Recipient Bank details
   recipientAddress       String? // Address of the recipient
   recipientBankName      String? // Name of the recipient's bank
@@ -50,23 +134,27 @@ model Transfer {
   recipientTransitNumber String? // Routing number (for US and Canada)
   recipientSortCode      String? // Sort code (for UK)
   recipientCLABE         String? // CLABE (for Mexico)
+  oTPVerificationId      Int?
+  HostedWithdrawals      HostedWithdrawals[]
+  HostedDeposits         HostedDeposits[]
 
   @@index([senderId], name: "sender_idx")
+  @@index([senderAuthSessionId], name: "sender_auth_session_idx")
+  @@index([receiverAuthSessionId], name: "receiver_auth_session_idx")
 }
 
 // OTPVerification model
 model OTPVerification {
-  id         Int      @id @default(autoincrement())
-  transferId String   @unique
-  otpCode    String
-  expiresAt  DateTime
-  verified   Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  otpCode   String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  transfer Transfer @relation(fields: [transferId], references: [id])
-
-  @@index([transferId], name: "transfer_idx")
+  user     User       @relation(fields: [userId], references: [id])
+  Transfer Transfer[]
 }
 
 // Enum for transfer statuses

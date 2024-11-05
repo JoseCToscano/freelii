@@ -20,13 +20,26 @@ import {
 } from "~/components/ui/tooltip";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { useParams } from "next/navigation";
+import { api } from "~/trpc/react";
 
 export default function Component() {
+  const { transferId } = useParams();
+
+  const transfer = api.stellar.getTransferData.useQuery(
+    {
+      transferId,
+    },
+    {
+      enabled: !!transferId,
+    },
+  );
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">
+          <CardTitle className="text-2xl font-bold text-[#3390EC]">
             MoneyGram Cash Payment
           </CardTitle>
           <CardDescription>
@@ -38,7 +51,11 @@ export default function Component() {
             <Label htmlFor="amount">Amount to Pay</Label>
             <div className="flex items-center text-2xl font-bold">
               <DollarSign className="mr-1 h-6 w-6" />
-              5,425.00 USD
+              {Number(transfer?.data?.amount)?.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{" "}
+              USD
             </div>
           </div>
           <Separator />
@@ -70,7 +87,7 @@ export default function Component() {
           </div>
           <div className="space-y-2">
             <Label>Recipient Information</Label>
-            <p className="text-sm">Name: ACME Financial Services</p>
+            <p className="text-sm">Name: [Fake bank] ACME Financial Services</p>
             <p className="text-sm">City: New York</p>
             <p className="text-sm">Country: United States</p>
           </div>
@@ -99,7 +116,7 @@ export default function Component() {
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Link href="/transfer-preview">
+          <Link href={`/payment-link/${String(transferId)}`}>
             <Button variant="outline">Back</Button>
           </Link>
           <Button>

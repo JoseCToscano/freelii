@@ -19,8 +19,46 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import Link from "next/link";
+import { api } from "~/trpc/react";
+import { ClientTRPCErrorHandler } from "~/lib/utils";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
+interface IBank {
+  how: "fake bank account number";
+  id: "a7a326b9-aad2-4af9-9182-7c11fe7192ba";
+  extra_info: {
+    message: "'how' would normally contain a terse explanation for how to deposit the asset with the anchor, and 'extra_info' would provide any additional information.";
+  };
+}
 export default function Component() {
+  const { transferId } = useParams();
+  const [depositData, setDepositData] = useState<IBank>(null);
+
+  const transfer = api.stellar.getTransferData.useQuery(
+    {
+      transferId,
+    },
+    {
+      enabled: !!transferId,
+    },
+  );
+
+  const deposit = api.stellar.deposit.useMutation({
+    onError: ClientTRPCErrorHandler,
+    onSuccess: (data) => {
+      setDepositData(data);
+      console.log(data);
+    },
+  });
+
+  useEffect(() => {
+    if (transferId) {
+      deposit.mutate({ transferId });
+    }
+  }, [transferId]);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
@@ -35,12 +73,19 @@ export default function Component() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="amount">Amount to Pay</Label>
-            <div className="text-2xl font-bold">$5,425.00 USD</div>
+            <div className="text-2xl font-bold">
+              $
+              {Number(transfer?.data?.amount)?.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{" "}
+              USD
+            </div>
           </div>
           <Separator />
           <div className="space-y-2">
             <Label htmlFor="bank-name">Bank Name</Label>
-            <Input id="bank-name" value="ACME International Bank" readOnly />
+            <Input id="bank-name" value="FAKE International Bank" readOnly />
           </div>
           <div className="space-y-2">
             <Label htmlFor="account-number">Account Number</Label>
@@ -53,7 +98,11 @@ export default function Component() {
                       size="icon"
                       variant="outline"
                       onClick={() =>
-                        navigator.clipboard.writeText("1234567890")
+                        navigator.clipboard
+                          .writeText("1234567890")
+                          .then(() =>
+                            toast.success("Account Number Copied to Clipboard"),
+                          )
                       }
                     >
                       <Copy className="h-4 w-4" />
@@ -76,7 +125,13 @@ export default function Component() {
                     <Button
                       size="icon"
                       variant="outline"
-                      onClick={() => navigator.clipboard.writeText("987654321")}
+                      onClick={() =>
+                        navigator.clipboard
+                          .writeText("987654321")
+                          .then(() =>
+                            toast.success("Routing Number Copied to Clipboard"),
+                          )
+                      }
                     >
                       <Copy className="h-4 w-4" />
                     </Button>
@@ -99,7 +154,11 @@ export default function Component() {
                       size="icon"
                       variant="outline"
                       onClick={() =>
-                        navigator.clipboard.writeText("PAY-123456789")
+                        navigator.clipboard
+                          .writeText("PAY-123456789")
+                          .then(() =>
+                            toast.success("Reference Copied to Clipboard"),
+                          )
                       }
                     >
                       <Copy className="h-4 w-4" />
@@ -137,7 +196,7 @@ export default function Component() {
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Link href="/payment-link">
+          <Link href={`/payment-link/${String(transferId)}`}>
             <Button variant="outline">Back</Button>
           </Link>
           <Button>

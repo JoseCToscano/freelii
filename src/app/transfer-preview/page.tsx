@@ -1,5 +1,17 @@
 "use client";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  ChevronLeft,
+  DollarSign,
+  Globe,
+  Info,
+  Send,
+  Smartphone,
+  User,
+  Zap,
+  Lock,
+} from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -8,174 +20,389 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Separator } from "~/components/ui/separator";
 import { api } from "~/trpc/react";
 import { Currency } from "@prisma/client";
 import toast from "react-hot-toast";
 import { ClientTRPCErrorHandler } from "~/lib/utils";
 import { useState } from "react";
+import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Input } from "~/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 
 export default function Component() {
-  const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(0);
+  const [formData, setFormData] = useState({
+    country: "",
+    recipientName: "",
+    phoneNumber: "",
+    amount: "",
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [isHoveredFeature, setIsHoveredFeature] = useState<number | null>(null);
+
+  const countries = [
+    { value: "us", label: "United States" },
+    { value: "ca", label: "Canada" },
+    { value: "mx", label: "Mexico" },
+    { value: "gb", label: "United Kingdom" },
+    { value: "fr", label: "France" },
+    { value: "de", label: "Germany" },
+    { value: "jp", label: "Japan" },
+    { value: "au", label: "Australia" },
+    { value: "br", label: "Brazil" },
+    { value: "in", label: "India" },
+  ];
+
+  const features = [
+    { icon: Globe, title: "International" },
+    { icon: Zap, title: "Fast" },
+    { icon: Lock, title: "Secure" },
+    { icon: Smartphone, title: "Mobile-friendly" },
+  ];
 
   const transfer = api.transfers.createTransfer.useMutation({
     onError: ClientTRPCErrorHandler,
-    onSuccess: () => {
-      toast.success("Transfer Success!");
-    },
   });
 
-  const escrow = api.escrow.initialize.useMutation({
-    onError: ClientTRPCErrorHandler,
-    onSuccess: () => {
-      toast.success("Escrow Success!");
-    },
-  });
-
-  const funds = api.escrow.fund.useMutation({
-    onError: ClientTRPCErrorHandler,
-    onSuccess: () => {
-      toast.success("Funds submitted");
-    },
-  });
-
-  const handleTransfer = async () => {
-    await transfer.mutateAsync({
-      amount: 1,
-      recipientPhone: "+523313415550",
-      recipientName: "Jane Smith",
-      currency: Currency.USD,
-      senderId: 1,
-    });
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const handleInitializeEscrow = async () => {
-    setIsLoading(true);
-    await escrow
-      .mutateAsync({
-        funds: 1,
-        phoneNumber: "+523313415550",
-      })
-      .finally(() => {
-        setIsLoading(false);
+  const handleCountryChange = (value: string) => {
+    setFormData((prevData) => ({ ...prevData, country: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // Simulate API call
+    if (step < 4) {
+      setStep(step + 1);
+    } else {
+      console.log("Form submitted:", {
+        ...formData,
+        amount: `${formData.amount} USD`,
       });
-    setStep(1);
-  };
+      setIsLoading(true);
+      const tx = await transfer
+        .mutateAsync({
+          amount: Number(formData.amount),
+          recipientPhone: formData.phoneNumber,
+          recipientName: formData.recipientName,
+          currency: Currency.USD,
+        })
+        .finally(() => setIsLoading(false));
+      if (!tx) {
+        toast.error("Failed to create transfer");
+        return;
+      }
+      toast.success("Transfer created successfully");
 
-  const handleTransferFunds = async () => {
-    setIsLoading(true);
-    await funds.mutateAsync().finally(() => {
-      setIsLoading(false);
-    });
-  };
-
-  const handleSubmit = async () => {
-    if (step === 0) {
-      await handleInitializeEscrow();
+      window.location.href = `/welcome/${String(tx.id)}`;
     }
-    if (step === 1) {
-      await handleTransferFunds();
+  };
+
+  const handleBack = () => {
+    setStep(step - 1);
+  };
+
+  const handleEdit = (editStep: number) => {
+    setStep(editStep);
+  };
+
+  const renderStep = () => {
+    switch (step) {
+      case 0:
+        return (
+          <div className="space-y-6">
+            <div className="rounded-lg border border-[#3390EC] bg-[#E7F3FF] p-4">
+              <p className="text-sm leading-relaxed text-[#3390EC]">
+                Welcome! You&#39;re about to set up an international money
+                transfer. Here&#39;s what to expect:
+              </p>
+              <ol className="mt-2 list-inside list-decimal text-sm text-gray-700">
+                <li>Enter the recipient&#39;s details</li>
+                <li>Review and confirm your transaction</li>
+                <li>Complete personal verification</li>
+              </ol>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {features.map((feature, index) => (
+                <TooltipProvider key={index}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div
+                        className="flex cursor-help flex-col items-center justify-center rounded-lg bg-white p-4 text-center shadow-sm transition-all duration-300 ease-in-out hover:shadow-md"
+                        style={{
+                          transform:
+                            isHoveredFeature === index
+                              ? "scale(1.05)"
+                              : "scale(1)",
+                          backgroundColor:
+                            isHoveredFeature === index ? "#E7F3FF" : "white",
+                        }}
+                        onMouseEnter={() => setIsHoveredFeature(index)}
+                        onMouseLeave={() => setIsHoveredFeature(null)}
+                      >
+                        <feature.icon className="mb-2 h-8 w-8 text-[#3390EC]" />
+                        <h3 className="text-sm font-semibold text-gray-900">
+                          {feature.title}
+                        </h3>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{getTooltipContent(feature.title)}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ))}
+            </div>
+            <Button onClick={() => setStep(1)} className="w-full">
+              Start Transfer
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        );
+      case 1:
+        return (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="country">Where are you sending money to?</Label>
+              <Select
+                name="country"
+                value={formData.country}
+                onValueChange={handleCountryChange}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a country" />
+                </SelectTrigger>
+                <SelectContent>
+                  {countries.map((country) => (
+                    <SelectItem key={country.value} value={country.value}>
+                      {country.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        );
+      case 2:
+        return (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="recipientName">Recipient&#39;s Name</Label>
+              <Input
+                id="recipientName"
+                name="recipientName"
+                placeholder="Enter recipient's name"
+                value={formData.recipientName}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber">Recipient&#39;s Phone Number</Label>
+              <Input
+                id="phoneNumber"
+                name="phoneNumber"
+                type="tel"
+                placeholder="Enter recipient's phone number"
+                value={formData.phoneNumber}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+          </div>
+        );
+      case 3:
+        return (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="amount">Amount to Send</Label>
+              <Input
+                id="amount"
+                name="amount"
+                type="number"
+                placeholder="Enter amount"
+                value={formData.amount}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+          </div>
+        );
+      case 4:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-3 rounded-lg border-none bg-[#E7F3FF] p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600">Country:</span>
+                <span className="font-mono font-medium">
+                  {countries.find((c) => c.value === formData.country)?.label}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600">Recipient:</span>
+                <span className="font-mono font-medium">
+                  {formData.recipientName}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600">Phone Number:</span>
+                <span className="font-mono font-medium">
+                  {formData.phoneNumber}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600">Amount:</span>
+                <span className="font-mono text-lg font-medium text-[#3390EC]">
+                  $
+                  {Number(formData.amount).toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maxFractionDigits: 2,
+                  })}{" "}
+                  USD
+                </span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => handleEdit(1)}
+              >
+                <Globe className="mr-2 h-4 w-4" />
+                Edit Country
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => handleEdit(2)}
+              >
+                <User className="mr-2 h-4 w-4" />
+                Edit Recipient Details
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => handleEdit(3)}
+              >
+                <DollarSign className="mr-2 h-4 w-4" />
+                Edit Amount
+              </Button>
+            </div>
+          </div>
+        );
     }
-  };
-
-  const PreviewContent = () => {
-    return (
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">From</p>
-            <p className="font-medium">John Doe</p>
-          </div>
-          <ArrowRight className="h-5 w-5 text-muted-foreground" />
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">To</p>
-            <p className="font-medium">Jane Smith</p>
-          </div>
-        </div>
-        <Separator />
-        <div>
-          <p className="text-sm text-muted-foreground">Amount</p>
-          <p className="text-2xl font-bold">€5,000.00 EUR</p>
-          <p className="text-sm text-muted-foreground">$5,425.00 USD</p>
-        </div>
-        <Separator />
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <p className="text-sm">Transfer Date</p>
-            <p className="text-sm font-medium">May 15, 2023</p>
-          </div>
-          <div className="flex justify-between">
-            <p className="text-sm">Estimated Arrival</p>
-            <p className="text-sm font-medium">May 17, 2023</p>
-          </div>
-          <div className="flex justify-between">
-            <p className="text-sm">Fee</p>
-            <p className="text-sm font-medium">$25.00</p>
-          </div>
-        </div>
-        <Separator />
-        <div>
-          <p className="text-sm text-muted-foreground">Reference</p>
-          <p className="text-sm">INV-2023-05-15</p>
-        </div>
-      </CardContent>
-    );
-  };
-
-  const PaymentLinkContent = () => {
-    return (
-      <CardContent className="space-y-4">
-        <div>
-          <p className="text-sm text-muted-foreground">Payment Link</p>
-          <p className="font-medium">https://example.com/payment-link</p>
-        </div>
-        <Separator />
-        <div>
-          <p className="text-sm text-muted-foreground">Expires</p>
-          <p className="font-medium">May 15, 2023</p>
-        </div>
-        <Separator />
-        <div>
-          <p className="text-sm text-muted-foreground">Amount</p>
-          <p className="text-2xl font-bold">€5,000.00 EUR</p>
-          <p className="text-sm text-muted-foreground">$5,425.00 USD</p>
-        </div>
-        <Separator />
-        <div>
-          <p className="text-sm text-muted-foreground">Reference</p>
-          <p className="text-sm">INV-2023-05-15</p>
-        </div>
-      </CardContent>
-    );
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-xl font-medium">Review Transfer</CardTitle>
+        <CardHeader className="text-center">
+          <CardTitle className="flex items-center justify-center text-2xl font-bold text-[#3390EC]">
+            <Send className="mr-2 h-6 w-6 text-[#3390EC]" />
+            {step === 0 && "Send Money with Your Phone"}
+            {step === 1 && "Select Country"}
+            {step === 2 && "Recipient Details"}
+            {step === 3 && "Enter Amount"}
+            {step === 4 && "Confirm Transaction"}
+          </CardTitle>
+          <p className="mt-2 text-sm text-gray-600">
+            {step === 0 &&
+              "No need for complicated account details - it's as easy as sending a message!"}
+            {step === 1 && "Select the country where the recipient is located"}
+            {step === 2 && "Enter the recipient's name and phone number"}
+            {step === 3 && "Enter the amount you want to send"}
+            {step === 4 && "Review and confirm your transaction details"}
+          </p>
         </CardHeader>
-        {step === 0 && <PreviewContent />}
-        {step === 1 && <PaymentLinkContent />}
-        <CardFooter className="flex justify-end space-x-2">
-          {step === 0 && <Button variant="outline">Cancel</Button>}
-          {/*<Link href="/payment-link">*/}
-          <Button disabled={isLoading} onClick={handleSubmit}>
-            {isLoading ? (
-              <>
-                <span className="mr-2 animate-spin">⏳</span>
-                Processing...
-              </>
-            ) : step === 0 ? (
-              "Continue"
-            ) : (
-              "(Simulate Payment)"
+        <CardContent>
+          <form onSubmit={handleSubmit}>
+            {renderStep()}
+            {step > 0 && (
+              <div className="mt-6 flex justify-between">
+                <Button type="button" variant="outline" onClick={handleBack}>
+                  <ChevronLeft className="mr-2 h-4 w-4" />
+                  Back
+                </Button>
+                {step < 4 && (
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <span className="mr-2 animate-spin">⏳</span>
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        Next
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                )}
+                {step === 4 && (
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <span className="mr-2 animate-spin">⏳</span>
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        Confirm and Send
+                        <Check className="ml-2 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
             )}
-          </Button>
-          {/*</Link>*/}
+          </form>
+        </CardContent>
+        <CardFooter className="flex flex-col text-center text-sm text-gray-500">
+          <div className="flex w-full items-center justify-center">
+            <Info className="mr-2 h-4 w-4 text-[#3390EC]" />
+            {step === 0
+              ? "Get started with your transfer"
+              : `Step ${step} of 4`}
+          </div>
+          <span className="mt-4 text-xs text-muted-foreground">
+            © Freelii, All rights reserved.
+          </span>
         </CardFooter>
       </Card>
     </div>
   );
+}
+
+function getTooltipContent(title: string) {
+  switch (title) {
+    case "International":
+      return "Send money to recipients in various countries";
+    case "Fast":
+      return "Quick processing for speedy transfers";
+    case "Secure":
+      return "Your transaction is protected with advanced security measures";
+    case "Mobile-friendly":
+      return "Easy to use on your smartphone or tablet";
+    default:
+      return "";
+  }
 }
