@@ -148,10 +148,16 @@ export default function Component() {
     if (contractId) {
       setContract(contractId);
       console.log("contractId", contractId);
-      return startAuthSession();
+      return startAuthSession(Number(contractId));
     }
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    if (transfer.data?.recipientPhone) {
+      setPhoneNumber(transfer.data?.recipientPhone);
+    }
+  }, [transfer.data]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
