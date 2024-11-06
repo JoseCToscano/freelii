@@ -225,7 +225,7 @@ export default function Component() {
         clickFeedback("success");
         toast.success("Phone number verified successfully");
         setIsLoading(false);
-        if (USE_PASSKEY) {
+        if (USE_PASSKEY || isReceiver) {
           setStep(3);
         } else {
           console.log("userRes", userRes);
