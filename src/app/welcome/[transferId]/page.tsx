@@ -3,16 +3,12 @@
 import { useEffect, useState } from "react";
 import {
   Smartphone,
-  Zap,
-  Lock,
   ArrowRight,
   Send,
   PhoneCall,
-  Info,
   KeyRound,
   RefreshCw,
   UserCheck,
-  ShieldCheck,
   Phone,
   User as UserIcon,
 } from "lucide-react";
@@ -31,23 +27,25 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { usePasskey } from "~/hooks/usePasskey";
-import { ClientTRPCErrorHandler, shortStellarAddress } from "~/lib/utils";
+import { ClientTRPCErrorHandler, parsePhoneNumber } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import toast from "react-hot-toast";
 import { Keypair, TransactionBuilder } from "@stellar/stellar-sdk";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import ExpandingArrow from "~/components/ui/expanding-arrow";
-import { User } from "@prisma/client";
+import { type User } from "@prisma/client";
 import { useParams, useSearchParams } from "next/navigation";
 import { useHapticFeedback } from "~/hooks/useHapticFeedback";
-import { Alert } from "~/components/ui/alert";
 
 const USE_PASSKEY = false;
 
 export default function Component() {
   const { clickFeedback } = useHapticFeedback();
   const searchParams = useSearchParams();
+
+  const isReceiver = searchParams.get("receiver") === "true";
+
   const { transferId } = useParams();
   const [step, setStep] = useState(0);
   const [attempt, setAttempt] = useState(0);
@@ -60,8 +58,6 @@ export default function Component() {
   const [isHoveredFeature, setIsHoveredFeature] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
-
-  const isReceiver = searchParams.get("receiver") === "true";
 
   const { create } = usePasskey(phoneNumber);
 
@@ -260,6 +256,15 @@ export default function Component() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!isReceiver) {
+      const senderPhone = searchParams.get("senderPhone");
+      if (senderPhone) {
+        setPhoneNumber(parsePhoneNumber(senderPhone));
+      }
+    }
+  }, [isReceiver, searchParams]);
 
   const renderStep = () => {
     switch (step) {

@@ -1,13 +1,15 @@
 // app/api/bot/route.js
 
 import { type NextRequest, NextResponse } from "next/server";
-import TelegramBot, { InlineQuery } from "node-telegram-bot-api";
+import TelegramBot from "node-telegram-bot-api";
 import { env } from "~/env";
 import {
   countries,
   countryCurrencyMap,
   getRate,
   mapCountry,
+  parsePhoneNumber,
+  toPascalCase,
 } from "~/lib/utils";
 import { db } from "~/server/db";
 import { TransferStatus } from "@prisma/client";
@@ -15,6 +17,88 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
+
+const NAME_PROMPTS = [
+  "Great! Let’s make sure everything’s accurate. Could you enter the recipient’s full name, just as it appears on their ID?📝 E.g., Jane Doe",
+  "Almost there! Please share the recipient's full name exactly as shown on their official ID.📝 E.g., John Doe",
+  "Awesome! Please enter the recipient's full name as it appears on their official ID. 📝 E.g., Jane Doe",
+  "Got it! Could you please provide the recipient's full name, just as it appears on their ID? 📝 E.g., John Doe",
+];
+
+const promptForRecipientName = () => {
+  return NAME_PROMPTS[Math.floor(Math.random() * NAME_PROMPTS.length)]!;
+};
+
+const PHONE_NUMBER_PROMPTS = [
+  (name: string) =>
+    `Thank you! Could you please provide ${toPascalCase(name)}'s phone number, including the country code? 📱 E.g., +639123456789`,
+  (name: string) =>
+    `Almost done! May I have ${toPascalCase(name)}'s phone number with the country code? 📱 E.g., +639123456789`,
+  (name: string) =>
+    `Great! Please enter ${toPascalCase(name)}'s phone number, including the country code. 📱 E.g., +639123456789`,
+  (name: string) =>
+    `Perfect! Could you let us know ${toPascalCase(name)}'s full phone number, country code included? 📱 E.g., +639123456789`,
+  (name: string) =>
+    `Thanks! Could you add ${toPascalCase(name)}'s phone number along with the country code? 📱 E.g., +639123456789`,
+];
+
+const promptForPhoneNumber = (name: string) => {
+  return PHONE_NUMBER_PROMPTS[
+    Math.floor(Math.random() * PHONE_NUMBER_PROMPTS.length)
+  ]!(name);
+};
+
+const COUNTRY_PROMPTS = [
+  (name: string) =>
+    `Thanks! Could you let us know which country will *${toPascalCase(name)}* be receiving the funds in? 🌍 E.g., Philippines`,
+  (name: string) =>
+    `Awesome! Now, just tell us the country where *${toPascalCase(name)}* will pick up the funds. 🌍 E.g., Philippines`,
+  (name: string) =>
+    `Great! Please provide the country where *${toPascalCase(name)}* will receive the funds. 🌍 E.g., Philippines`,
+  (name: string) =>
+    `Perfect! Which country should we send the funds to for *${toPascalCase(name)}*? 🌍 E.g., Philippines`,
+];
+
+const promptForCountry = (name: string) => {
+  return COUNTRY_PROMPTS[Math.floor(Math.random() * COUNTRY_PROMPTS.length)]!(
+    name,
+  );
+};
+
+const AMOUNT_PROMPTS = [
+  (name: string, country: string) =>
+    `Got it! How much (USD) would you like to send to *${toPascalCase(name)}* in *${toPascalCase(country)}*? 💸 E.g., 100`,
+  (name: string, country: string) =>
+    `Great! Please enter the amount (USD) you'd like to send to *${toPascalCase(name)}* in *${toPascalCase(country)}*. 💸 E.g., 100`,
+  (name: string, country: string) =>
+    `Thanks! How much (USD) are we sending to *${toPascalCase(name)}* in *${toPascalCase(country)}*? 💸 E.g., 100`,
+  (name: string, country: string) =>
+    `Awesome! Could you let us know how much (USD) you’d like to send to *${toPascalCase(name)}* in *${toPascalCase(country)}*? 💸 E.g., 100`,
+  (name: string, country: string) =>
+    `Perfect! What amount (USD) should we transfer to *${toPascalCase(name)}* in *${toPascalCase(country)}*?`,
+];
+
+const promptForAmount = (name: string, country: string) => {
+  const countryName = countries.find(
+    (c) => c.value === mapCountry(country),
+  )?.label;
+  return AMOUNT_PROMPTS[Math.floor(Math.random() * AMOUNT_PROMPTS.length)]!(
+    name,
+    countryName ?? country,
+  );
+};
+
+const parseAmount = (input: string): number => {
+  let amount = input.replace(/,/g, "");
+  // Remove any currency symbols
+  amount = amount.replace(/[$£€]/g, "");
+  amount = amount.split(" ")[0]!;
+  const parsedAmount = Number(amount);
+  if (isNaN(parsedAmount)) {
+    return 1;
+  }
+  return parsedAmount;
+};
 
 const bot = new TelegramBot(env.TELEGRAM_BOT_TOKEN, { webHook: true });
 
@@ -139,6 +223,9 @@ export async function POST(req: NextRequest) {
     if (update.message.text === "/start") {
       const chatId = update.message.chat.id;
       const userId = update.message.from?.id;
+
+      // Quick reply just to not leave them hanging
+
       if (userId) {
         const user = await db.user.findFirst({
           where: { telegramId: String(userId) },
@@ -161,6 +248,12 @@ export async function POST(req: NextRequest) {
                 one_time_keyboard: true,
               },
             },
+          );
+          return NextResponse.json({ status: "ok" });
+        } else {
+          await bot.sendMessage(
+            chatId,
+            "Welcome back! You can use the /send command to send money or /redeem to review and redeem pending transactions.",
           );
           return NextResponse.json({ status: "ok" });
         }
@@ -234,83 +327,119 @@ export async function POST(req: NextRequest) {
     } // Directly check if the message text is "/send"
     else if (update.message.text === "/send") {
       const chatId = update.message.chat.id;
-      // Step 1: Prompt the user to enter the recipient's full name
-      await bot.sendMessage(
-        chatId,
-        "Please enter the recipient's full name as it appears on their official ID.",
-      );
+      let userPhone = "";
+      const userId = update.message.from?.id;
+      if (userId) {
+        db.user
+          .findFirst({
+            where: { telegramId: String(userId) },
+          })
+          .then((user) => {
+            if (user?.phone) {
+              userPhone = user.phone;
+            }
+          })
+          .catch(console.error);
+      }
 
-      // Step 2: Capture the recipient's name and ask for the country
+      // Step 0: Prompt the user to enter the recipient's full name
+      await bot.sendMessage(chatId, promptForRecipientName(), {
+        parse_mode: "Markdown",
+      });
+
+      // Step 1: Prompot for recipient's phone number
       bot.once("message", async (nameMsg) => {
         const recipientName = nameMsg.text;
 
-        // Ask for the country
         await bot.sendMessage(
           chatId,
-          `Thank you! Please tell us the country where ${recipientName} will receive the funds.`,
+          promptForPhoneNumber(String(recipientName)),
+          {
+            parse_mode: "Markdown",
+          },
         );
 
-        // Step 3: Capture the country and then ask for the amount
-        bot.once("message", async (countryMsg) => {
-          const recipientCountry = countryMsg.text;
+        // Step 2: Capture the recipient's name and ask for the country
+        bot.once("message", async (phoneMsg) => {
+          console.log("phoneMsg:", phoneMsg);
+          const phoneNumber = parsePhoneNumber(String(phoneMsg.text));
+          console.log("phoneNumber:", phoneNumber);
 
-          // Ask for the amount to send
+          // Ask for the country
           await bot.sendMessage(
             chatId,
-            `Got it! How much would you like to send to ${recipientName} in ${recipientCountry}?`,
+            promptForCountry(String(recipientName)),
+            {
+              parse_mode: "Markdown",
+            },
           );
 
-          // Step 4: Capture the amount
-          bot.once("message", async (amountMsg) => {
-            const amount = amountMsg.text;
-            const selectedCountry = countries.find(
-              (c) => c.value === mapCountry(recipientCountry),
-            );
-            const rateTo =
-              countryCurrencyMap[
-                selectedCountry?.value as keyof typeof countryCurrencyMap
-              ] ?? "MXN";
-            const rate = await getRate("USD", rateTo);
-            // Confirm the transaction details with the user
+          // Step 3: Capture the country and then ask for the amount
+          bot.once("message", async (countryMsg) => {
+            const recipientCountry = countryMsg.text;
+
+            // Ask for the amount to send
             await bot.sendMessage(
               chatId,
-              `📝 *Transaction Summary*
+              promptForAmount(String(recipientName), String(recipientCountry)),
+              {
+                parse_mode: "Markdown",
+              },
+            );
+
+            // Step 4: Capture the amount
+            bot.once("message", async (amountMsg) => {
+              const amount = parseAmount(amountMsg.text ?? "1");
+              const selectedCountry = countries.find(
+                (c) => c.value === mapCountry(recipientCountry),
+              );
+              const rateTo =
+                countryCurrencyMap[
+                  selectedCountry?.value as keyof typeof countryCurrencyMap
+                ] ?? "MXN";
+              const rate = await getRate("USD", rateTo);
+              // Confirm the transaction details with the user
+              await bot.sendMessage(
+                chatId,
+                `📝 *Transaction Summary*
 
 *Recipient Information*
 - *Name*: ${recipientName}
+- *Phone*: ${phoneNumber}
 - *Country*: ${selectedCountry?.label ?? recipientCountry}
 
 *Transaction Details*
 - *Amount*: ${amount} USD
 - *${recipientName}* will receive $${(
-                Number(rate) * Number(amount)
-              ).toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })} ${rateTo}
+                  Number(rate) * Number(amount)
+                ).toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })} ${rateTo}
 
 *Exchange Rate*: $1.00 USD = ${rate} ${rateTo}
 
 ⬇️ *Action Required*
-If everything looks correct, tap *Review & Confirm* to proceed. To cancel, tap *Cancel*.
+If everything looks correct, tap *Review & Confirm* to proceed. We'll guide you through the rest of the process.
 `,
-              {
-                parse_mode: "Markdown",
-                reply_markup: {
-                  inline_keyboard: [
-                    [
-                      {
-                        text: "Review & Confirm",
-                        web_app: {
-                          url: `${env.NEXT_PUBLIC_APP_URL}/transfer-preview?recipient=${recipientName}&country=${recipientCountry?.toLowerCase()}&amount=${amount}`,
+                {
+                  parse_mode: "Markdown",
+                  reply_markup: {
+                    inline_keyboard: [
+                      [
+                        {
+                          text: "Review & Confirm",
+                          web_app: {
+                            url: `${env.NEXT_PUBLIC_APP_URL}/transfer-preview?recipient=${recipientName}&country=${recipientCountry?.toLowerCase()}&amount=${amount}&recipientPhone=${phoneNumber?.replace("+", "")}&senderPhone=${userPhone?.replace("+", "")}`,
+                          },
                         },
-                      },
-                      { text: "❌ Cancel", callback_data: "cancel" },
+                        { text: "❌ Cancel", callback_data: "cancel" },
+                      ],
                     ],
-                  ],
+                  },
                 },
-              },
-            );
+              );
+            });
           });
         });
       });

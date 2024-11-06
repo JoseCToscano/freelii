@@ -79,12 +79,6 @@ export default function FreeliiLandingPage() {
                 href="#"
                 className="text-base font-medium text-gray-500 hover:text-gray-900"
               >
-                Pricing
-              </a>
-              <a
-                href="#"
-                className="text-base font-medium text-gray-500 hover:text-gray-900"
-              >
                 Contact
               </a>
             </nav>
@@ -217,7 +211,6 @@ export default function FreeliiLandingPage() {
                   Sending money to your recipients is quick and easy with
                   Freelii.
                 </p>
-
                 <dl className="mt-10 space-y-10">
                   {[
                     {

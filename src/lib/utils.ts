@@ -385,6 +385,12 @@ export const mapCountry = (input?: string): string | undefined => {
   ) {
     case "US":
     case "USA":
+    case "EEUU":
+    case "EU":
+    case "E.U.":
+    case "E.U.A":
+    case "AMERICA":
+    case "MERICA":
     case "USTATES":
     case "U.S.A":
     case "UNITEDSTATES":
@@ -393,9 +399,15 @@ export const mapCountry = (input?: string): string | undefined => {
       return "us";
     case "PH":
     case "PHILIPPINES":
+    case "PHILPPINES":
+    case "PHILPINES":
+    case "PHILLIPPINES":
     case "PHILIPPINEISLANDS":
     case "PHILIPPINAS":
     case "PILIPINAS":
+    case "PILLIPINAS":
+    case "PILIPPINES":
+    case "PILLIPPINES":
       return "ph";
     case "MX":
     case "MEXICO":
@@ -416,15 +428,22 @@ export const mapCountry = (input?: string): string | undefined => {
     case "UNITEDKINGDOM":
     case "BRITAIN":
     case "ENGLAND":
+    case "LONDON":
     case "GREATBRITAIN":
       return "gb";
     case "FR":
     case "FRANCE":
+    case "FRANCIA":
+    case "FRAN":
     case "FRANCAIS":
     case "FRENCH":
+    case "PARIS":
+    case "PARISIEN":
+    case "LA FRANCE":
       return "fr";
     case "DE":
     case "GERMANY":
+    case "ALEMANIA":
     case "DEUTSCHLAND":
     case "GER":
       return "de";
@@ -438,6 +457,8 @@ export const mapCountry = (input?: string): string | undefined => {
     case "BRAZIL":
     case "BRASIL":
     case "BRA":
+    case "BRAS":
+    case "BRASILIA":
       return "br";
     case "IN":
     case "INDIA":
@@ -474,4 +495,15 @@ export const getRate = async (from: string, to: string): Promise<number> => {
     `https://api.fastforex.io/fetch-multi?from=${from}&to=${to}&api_key=97240b59fa-9d256c22fb-smimi6`,
   );
   return response.data.results[to] ?? 0;
+};
+
+export const parsePhoneNumber = (phoneInput: string): string => {
+  const input = phoneInput.trim();
+  // Remove any non-numeric characters
+  input.replace(/\D/g, "");
+  // if "+" is not included, add it
+  if (!input.startsWith("+")) {
+    return `+${input}`;
+  }
+  return input;
 };

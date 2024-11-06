@@ -27,6 +27,7 @@ import {
   ClientTRPCErrorHandler,
   countries,
   mapCountry,
+  parsePhoneNumber,
   toPascalCase,
 } from "~/lib/utils";
 import { useState } from "react";
@@ -55,7 +56,9 @@ export default function Component() {
   const [formData, setFormData] = useState({
     country: mapCountry(searchParams.get("country") ?? ""),
     recipientName: toPascalCase(searchParams.get("recipient") ?? ""),
-    phoneNumber: searchParams.get("phoneNumber") ?? "+",
+    phoneNumber: searchParams.get("recipientPhone")
+      ? String(parsePhoneNumber(searchParams.get("recipientPhone") ?? ""))
+      : "",
     amount: searchParams.get("amount") ?? "",
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -108,7 +111,7 @@ export default function Component() {
       clickFeedback("success");
       toast.success("Looking good! Just a few more steps to go.");
 
-      window.location.href = `/welcome/${String(tx.id)}`;
+      window.location.href = `/welcome/${String(tx.id)}?${new URLSearchParams(searchParams).toString()}`;
     }
   };
 
@@ -222,7 +225,7 @@ export default function Component() {
               </span>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phoneNumber">Recipient&#39;s Phone Number</Label>
+              <Label htmlFor="phoneNumber">Recipient&#39;s Phone Number </Label>
               <Input
                 id="phoneNumber"
                 name="phoneNumber"
