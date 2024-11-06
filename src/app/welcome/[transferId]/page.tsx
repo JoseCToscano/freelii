@@ -261,7 +261,7 @@ export default function Component() {
     if (!isReceiver) {
       const senderPhone = searchParams.get("senderPhone");
       if (senderPhone) {
-        setPhoneNumber(parsePhoneNumber(senderPhone));
+        setPhoneNumber(decodeURIComponent(parsePhoneNumber(senderPhone)));
       }
     }
   }, [isReceiver, searchParams]);

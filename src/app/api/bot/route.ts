@@ -102,10 +102,10 @@ const parseAmount = (input: string): number => {
 
 const bot = new TelegramBot(env.TELEGRAM_BOT_TOKEN, { webHook: true });
 
-bot
-  .setWebHook(`${env.NEXT_PUBLIC_APP_URL}/api/bot`)
-  .then(() => console.log("Webhook set successfully"))
-  .catch((err) => console.error("Error setting webhook:", err));
+// bot
+//   .setWebHook(`${env.NEXT_PUBLIC_APP_URL}/api/bot`)
+//   .then(() => console.log("Webhook set successfully"))
+//   .catch((err) => console.error("Error setting webhook:", err));
 
 // Handle Callback Queries for Confirmation
 // Callback query handling in route.js

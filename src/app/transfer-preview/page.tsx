@@ -55,9 +55,13 @@ export default function Component() {
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState({
     country: mapCountry(searchParams.get("country") ?? ""),
-    recipientName: toPascalCase(searchParams.get("recipient") ?? ""),
+    recipientName: decodeURIComponent(
+      toPascalCase(searchParams.get("recipient") ?? ""),
+    ),
     phoneNumber: searchParams.get("recipientPhone")
-      ? String(parsePhoneNumber(searchParams.get("recipientPhone") ?? ""))
+      ? decodeURIComponent(
+          String(parsePhoneNumber(searchParams.get("recipientPhone") ?? "")),
+        )
       : "",
     amount: searchParams.get("amount") ?? "",
   });
