@@ -1,6 +1,5 @@
 "use client";
-import { useEffect } from "react";
-import toast from "react-hot-toast";
+import { Suspense, useEffect } from "react";
 
 export default function RootLayout({
   children,
@@ -42,5 +41,5 @@ export default function RootLayout({
         console.error("Error loading Telegram script:", err);
       });
   }, []); // Empty dependency array ensures it runs only once on initial load
-  return <>{children}</>;
+  return <Suspense fallback={<>...</>}>{children}</Suspense>;
 }
