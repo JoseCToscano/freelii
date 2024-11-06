@@ -306,7 +306,6 @@ If everything looks correct, tap *Review & Confirm* to proceed. To cancel, tap *
                         },
                       },
                       { text: "❌ Cancel", callback_data: "cancel" },
-                      { text: "Edit", callback_data: "edit" },
                     ],
                   ],
                 },
