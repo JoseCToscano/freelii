@@ -1,29 +1,26 @@
-# Create T3 App
+# Freelii
+Freelii is a platform designed to simplify and secure cross-border payments and asset transfers using the Stellar blockchain. It offers a seamless experience for both on-chain and off-chain transactions, making it ideal for freelancers, remote workers, and individuals needing efficient financial solutions.
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+## Features
+Cross-Border Payments: Transfer assets across different currencies and locations using Stellar's SEP standards.
+Chatbot Integration: Accessible via FreeliiBot on Telegram, allowing users to interact with the platform directly from their messaging app.
+Automated Currency Exchange: Supports Stellar assets and off-chain currency conversion, allowing users to transact seamlessly between different assets.
+## Demo
+Watch a video demo here to see Freelii in action.
 
-## What's next? How do I make an app with this?
+## Getting Started
+Visit the Freelii app at freelii.app to create an account, link your wallet, and start using the platform.
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+## Telegram Bot
+Freelii also provides a Telegram bot to make it easier to interact with the platform. Access the bot here: FreeliiBot on Telegram.
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
-
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
-
-## Learn More
-
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
-
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
-
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
-
-## How do I deploy this?
-
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+## How It Works
+Authentication: Freelii uses Stellar's SEP-10 for secure authentication.
+Currency Conversion: Freelii provides currency exchange capabilities via the SEP-38 quote system.
+Transaction Management: Users can send and receive assets through SEP-31 with enhanced security and streamlined processes.
+## Technologies Used
+Stellar Network: For blockchain-based payments and asset transfers.
+Telegram API: To enable bot interaction for easy transaction management.
+SEP Protocols: SEP-10 for authentication, SEP-31 for payments, SEP-38 for currency quotes.
+## License
+This project is licensed under the MIT License.
