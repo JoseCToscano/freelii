@@ -104,13 +104,13 @@ const KYCForm: FC = () => {
       const { photo_id_front, photo_id_back, ...stringFields } = formData;
       const sep12Id = await putKyc
         .mutateAsync({
-          type: "sender",
+          type: isReceiver ? "receiver" : "sender",
           transferId: String(transferId),
           fields: stringFields,
         })
         .catch(() => setLoading(false));
       const { url, config } = await kycFileConfig.mutateAsync({
-        type: "sender",
+        type: isReceiver ? "receiver" : "sender",
         transferId: String(transferId),
       });
       try {

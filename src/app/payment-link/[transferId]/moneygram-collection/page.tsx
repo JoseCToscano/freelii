@@ -34,7 +34,8 @@ export default function Component() {
   const handleCopyCode = () => {
     navigator.clipboard
       .writeText("1234567890")
-      .then(() => toast.success("Code copied"));
+      .then(() => toast.success("Code copied"))
+      .catch(() => toast.error("Failed to copy code"));
   };
 
   return (
