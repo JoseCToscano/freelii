@@ -18,7 +18,7 @@ import {
   xdr,
   BASE_FEE,
 } from "@stellar/stellar-sdk";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 import { env } from "~/env";
 
 export function cn(...inputs: ClassValue[]) {
@@ -352,3 +352,126 @@ export async function callWithSignedXDR(xdr: string) {
     }
   }
 }
+
+export const countries = [
+  { value: "us", label: "United States" },
+  { value: "ph", label: "Philippines" },
+  { value: "mx", label: "Mexico" },
+  { value: "co", label: "Colombia" },
+  { value: "ca", label: "Canada" },
+  { value: "gb", label: "United Kingdom" },
+  { value: "fr", label: "France" },
+  { value: "de", label: "Germany" },
+  { value: "au", label: "Australia" },
+  { value: "br", label: "Brazil" },
+  { value: "in", label: "India" },
+];
+
+export const toPascalCase = (input: string): string => {
+  return input
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+};
+
+export const mapCountry = (input?: string): string | undefined => {
+  if (!input) return undefined;
+
+  switch (
+    input
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z]/g, "")
+  ) {
+    case "US":
+    case "USA":
+    case "USTATES":
+    case "U.S.A":
+    case "UNITEDSTATES":
+    case "UNITEDSTATESOFAMERICA":
+    case "ESTADOSUNIDOS":
+      return "us";
+    case "PH":
+    case "PHILIPPINES":
+    case "PHILIPPINEISLANDS":
+    case "PHILIPPINAS":
+    case "PILIPINAS":
+      return "ph";
+    case "MX":
+    case "MEXICO":
+    case "MEX":
+    case "MEXICOESTADOSUNIDOS":
+      return "mx";
+    case "CO":
+    case "COLOMBIA":
+    case "REPUBLICADECOLOMBIA":
+      return "co";
+    case "CA":
+    case "CANADA":
+    case "CAN":
+    case "CANUCK":
+      return "ca";
+    case "GB":
+    case "UK":
+    case "UNITEDKINGDOM":
+    case "BRITAIN":
+    case "ENGLAND":
+    case "GREATBRITAIN":
+      return "gb";
+    case "FR":
+    case "FRANCE":
+    case "FRANCAIS":
+    case "FRENCH":
+      return "fr";
+    case "DE":
+    case "GERMANY":
+    case "DEUTSCHLAND":
+    case "GER":
+      return "de";
+    case "AU":
+    case "AUSTRALIA":
+    case "AUS":
+    case "DOWNUNDER":
+    case "OZ":
+      return "au";
+    case "BR":
+    case "BRAZIL":
+    case "BRASIL":
+    case "BRA":
+      return "br";
+    case "IN":
+    case "INDIA":
+    case "BHARAT":
+    case "IND":
+      return "in";
+    default:
+      return undefined;
+  }
+};
+
+// Mapping of country codes to their respective ISO 4217 currency codes
+export const countryCurrencyMap = {
+  us: "USD",
+  ph: "PHP",
+  mx: "MXN",
+  co: "COP",
+  ca: "CAD",
+  gb: "GBP",
+  fr: "EUR",
+  de: "EUR",
+  au: "AUD",
+  br: "BRL",
+  in: "INR",
+};
+
+export const getRate = async (from: string, to: string): Promise<number> => {
+  const response = await axios.get<{
+    base: "USD";
+    results: Record<string, number>;
+    updated: string;
+    ms: number;
+  }>(
+    `https://api.fastforex.io/fetch-multi?from=${from}&to=${to}&api_key=97240b59fa-9d256c22fb-smimi6`,
+  );
+  return response.data.results[to] ?? 0;
+};

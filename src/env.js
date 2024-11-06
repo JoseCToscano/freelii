@@ -39,6 +39,7 @@ export const env = createEnv({
     NEXT_PUBLIC_FACTORY_CONTRACT_ID: z.string(),
     NEXT_PUBLIC_NATIVE_CONTRACT_ID: z.string(),
     NEXT_PUBLIC_NETWORK_PASSPHRASE: z.string(),
+    NEXT_PUBLIC_APP_URL: z.string().url(),
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
   },
 
@@ -70,6 +71,7 @@ export const env = createEnv({
     NEXT_PUBLIC_NETWORK_PASSPHRASE: process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE,
     SRT_ASSET_ID: process.env.SRT_ASSET_ID,
     ENABLE_SMS: process.env.ENABLE_SMS,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

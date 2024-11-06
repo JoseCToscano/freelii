@@ -148,7 +148,8 @@ const KYCForm: FC = () => {
             Account Verification
           </CardTitle>
           <CardDescription>
-            We need some information to verify your account
+            We need to validate your personal information to complete the
+            transfer.
           </CardDescription>
         </CardHeader>
         <CardContent>

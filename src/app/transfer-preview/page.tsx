@@ -23,7 +23,12 @@ import {
 import { api } from "~/trpc/react";
 import { Currency } from "@prisma/client";
 import toast from "react-hot-toast";
-import { ClientTRPCErrorHandler } from "~/lib/utils";
+import {
+  ClientTRPCErrorHandler,
+  countries,
+  mapCountry,
+  toPascalCase,
+} from "~/lib/utils";
 import { useState } from "react";
 import { Label } from "~/components/ui/label";
 import {
@@ -41,32 +46,20 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { useHapticFeedback } from "~/hooks/useHapticFeedback";
+import { useSearchParams } from "next/navigation";
 
 export default function Component() {
+  const searchParams = useSearchParams();
   const { clickFeedback } = useHapticFeedback();
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState({
-    country: "",
-    recipientName: "",
-    phoneNumber: "",
-    amount: "",
+    country: mapCountry(searchParams.get("country") ?? ""),
+    recipientName: toPascalCase(searchParams.get("recipient") ?? ""),
+    phoneNumber: searchParams.get("phoneNumber") ?? "+",
+    amount: searchParams.get("amount") ?? "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isHoveredFeature, setIsHoveredFeature] = useState<number | null>(null);
-
-  const countries = [
-    { value: "us", label: "United States" },
-    { value: "ph", label: "Philippines" },
-    { value: "mx", label: "Mexico" },
-    { value: "co", label: "Colombia" },
-    { value: "ca", label: "Canada" },
-    { value: "gb", label: "United Kingdom" },
-    { value: "fr", label: "France" },
-    { value: "de", label: "Germany" },
-    { value: "au", label: "Australia" },
-    { value: "br", label: "Brazil" },
-    { value: "in", label: "India" },
-  ];
 
   const features = [
     { icon: Globe, title: "International" },

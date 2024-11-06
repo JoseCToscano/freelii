@@ -63,7 +63,7 @@ export default function Component() {
 
   const isReceiver = searchParams.get("receiver") === "true";
 
-  const { create } = usePasskey("+523313415550");
+  const { create } = usePasskey(phoneNumber);
 
   // tRPC Procedures
   const sep10Challenge = api.stellar.getAuthChallenge.useMutation({
@@ -99,8 +99,6 @@ export default function Component() {
   const features = [
     { icon: UserCheck, title: "Identity Verification" },
     { icon: Smartphone, title: "Code via SMS" },
-    { icon: ShieldCheck, title: "Secure Passkey" },
-    { icon: Zap, title: "Lightning Fast Transfer" },
   ];
 
   const startAuthSession = async (receivedId?: number) => {
@@ -365,7 +363,7 @@ export default function Component() {
                   {isLoading ? (
                     <>
                       <span className="mr-2 animate-spin">⏳</span>
-                      Sending OTP...
+                      Sending Verification Code...
                     </>
                   ) : (
                     <>
@@ -388,11 +386,15 @@ export default function Component() {
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="e.g., +1 234 567 8900"
+                  placeholder="e.g., +63 999 000 0000"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   required
                 />
+                <span className="ml-1 text-xs text-muted-foreground">
+                  Make sure to include the country code (e.g. +63 for
+                  Philippines)
+                </span>
               </div>
               <Button
                 type="submit"
@@ -552,12 +554,6 @@ export default function Component() {
         </CardHeader>
         <CardContent>{renderStep()}</CardContent>
         <CardFooter className="flex flex-col pb-3 text-center text-sm text-gray-500">
-          {step > 0 && step < 3 && (
-            <div className="flex w-full items-center justify-center">
-              <Info className="mr-2 h-4 w-4 text-[#3390EC]" />
-              Your passkey will be linked to this verified phone number
-            </div>
-          )}
           <span className="mt-2 text-xs text-muted-foreground">
             © 2024 Freelii. All rights reserved.
           </span>
