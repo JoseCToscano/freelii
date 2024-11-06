@@ -38,10 +38,12 @@ import { Label } from "~/components/ui/label";
 import ExpandingArrow from "~/components/ui/expanding-arrow";
 import { User } from "@prisma/client";
 import { useParams } from "next/navigation";
+import { useHapticFeedback } from "~/hooks/useHapticFeedback";
 
 const USE_PASSKEY = false;
 
 export default function Component() {
+  const { clickFeedback } = useHapticFeedback();
   const { transferId } = useParams();
   const [step, setStep] = useState(0);
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -157,6 +159,7 @@ export default function Component() {
         setIsLoading(true);
         // Simulate API call
         await newOtp.mutateAsync({ phone: phoneNumber });
+        clickFeedback("success");
         toast.success("Verification code sent to your phone");
         setIsLoading(false);
         setStep(2);
@@ -191,6 +194,7 @@ export default function Component() {
           otp: otp.join(""),
         });
         setUser(userRes);
+        clickFeedback("success");
         toast.success("Phone number verified successfully");
         setIsLoading(false);
         if (USE_PASSKEY) {
@@ -272,7 +276,13 @@ export default function Component() {
                 </TooltipProvider>
               ))}
             </div>
-            <Button onClick={() => setStep(1)} className="group w-full">
+            <Button
+              onClick={() => {
+                clickFeedback();
+                setStep(1);
+              }}
+              className="group w-full"
+            >
               <p className="text-light text-xs">Continue</p>
               <ExpandingArrow className="-ml-2 h-3.5 w-3.5" />
             </Button>
@@ -295,6 +305,7 @@ export default function Component() {
               </div>
               <Button
                 type="submit"
+                onClick={() => clickFeedback()}
                 className="group w-full"
                 disabled={isLoading}
               >
@@ -337,7 +348,12 @@ export default function Component() {
                   ))}
                 </div>
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                onClick={() => clickFeedback()}
+                className="w-full"
+                disabled={isLoading}
+              >
                 {isLoading ? (
                   <>
                     <span className="mr-2 animate-spin">⏳</span>

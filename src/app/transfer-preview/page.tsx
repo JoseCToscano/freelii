@@ -40,8 +40,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { useHapticFeedback } from "~/hooks/useHapticFeedback";
 
 export default function Component() {
+  const { clickFeedback } = useHapticFeedback();
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState({
     country: "",
@@ -83,6 +85,7 @@ export default function Component() {
   };
 
   const handleCountryChange = (value: string) => {
+    clickFeedback("selectionChanged");
     setFormData((prevData) => ({ ...prevData, country: value }));
   };
 
@@ -109,6 +112,7 @@ export default function Component() {
         toast.error("Failed to create transfer");
         return;
       }
+      clickFeedback("success");
       toast.success("Looking good! Just a few more steps to go.");
 
       window.location.href = `/welcome/${String(tx.id)}`;
@@ -116,6 +120,7 @@ export default function Component() {
   };
 
   const handleBack = () => {
+    clickFeedback();
     setStep(step - 1);
   };
 
@@ -170,7 +175,13 @@ export default function Component() {
                 </TooltipProvider>
               ))}
             </div>
-            <Button onClick={() => setStep(1)} className="w-full">
+            <Button
+              onClick={() => {
+                clickFeedback();
+                setStep(1);
+              }}
+              className="w-full"
+            >
               Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -354,7 +365,11 @@ export default function Component() {
                   Back
                 </Button>
                 {step < 4 && (
-                  <Button type="submit" disabled={isLoading}>
+                  <Button
+                    type="submit"
+                    onClick={() => clickFeedback()}
+                    disabled={isLoading}
+                  >
                     {isLoading ? (
                       <>
                         <span className="mr-2 animate-spin">⏳</span>

@@ -20,8 +20,10 @@ import { useParams, useSearchParams } from "next/navigation";
 import { ClientTRPCErrorHandler } from "~/lib/utils";
 import toast from "react-hot-toast";
 import axios from "axios";
+import { useHapticFeedback } from "~/hooks/useHapticFeedback";
 
 const KYCForm: FC = () => {
+  const { clickFeedback } = useHapticFeedback();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const { transferId } = useParams();
@@ -69,6 +71,7 @@ const KYCForm: FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    clickFeedback();
     setError("");
 
     if (step === 0) {
@@ -127,6 +130,7 @@ const KYCForm: FC = () => {
         toast.error("Error submitting files");
         throw e;
       }
+      clickFeedback("success");
       toast.success("Account Details Submitted!");
 
       window.location.href = `/payment-link/${String(transferId)}`;
