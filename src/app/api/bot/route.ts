@@ -136,7 +136,36 @@ export async function POST(req: NextRequest) {
     bot.emit("callback_query", update.callback_query);
   } else if (update.message) {
     console.log("received:", update.message.text);
-    if (update.message.text === "/redeem") {
+    if (update.message.text === "/start") {
+      const chatId = update.message.chat.id;
+      const userId = update.message.from?.id;
+      if (userId) {
+        const user = await db.user.findFirst({
+          where: { telegramId: String(userId) },
+        });
+        if (!user?.phone) {
+          await bot.sendMessage(
+            chatId,
+            "Let's get you started. Please share your phone number with us. We'll use it to search for pending transactions associated with your account.",
+            {
+              reply_markup: {
+                keyboard: [
+                  [
+                    {
+                      text: "Share your phone number",
+                      request_contact: true, // Requests the phone number
+                    },
+                  ],
+                ],
+                resize_keyboard: true,
+                one_time_keyboard: true,
+              },
+            },
+          );
+          return NextResponse.json({ status: "ok" });
+        }
+      }
+    } else if (update.message.text === "/redeem") {
       const chatId = update.message.chat.id;
       const userId = update.message.from?.id;
       if (userId) {
