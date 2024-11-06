@@ -13,6 +13,8 @@ import {
   RefreshCw,
   UserCheck,
   ShieldCheck,
+  Phone,
+  User as UserIcon,
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
@@ -37,15 +39,19 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import ExpandingArrow from "~/components/ui/expanding-arrow";
 import { User } from "@prisma/client";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useHapticFeedback } from "~/hooks/useHapticFeedback";
+import { Alert } from "~/components/ui/alert";
 
 const USE_PASSKEY = false;
 
 export default function Component() {
   const { clickFeedback } = useHapticFeedback();
+  const searchParams = useSearchParams();
   const { transferId } = useParams();
   const [step, setStep] = useState(0);
+  const [attempt, setAttempt] = useState(0);
+
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [contract, setContract] = useState<string | null>(null);
@@ -55,7 +61,9 @@ export default function Component() {
   const [isLoading, setIsLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
 
-  const { create, sign } = usePasskey("+523313415550");
+  const isReceiver = searchParams.get("receiver") === "true";
+
+  const { create } = usePasskey("+523313415550");
 
   // tRPC Procedures
   const sep10Challenge = api.stellar.getAuthChallenge.useMutation({
@@ -79,6 +87,14 @@ export default function Component() {
   const linkSenderAuthSession = api.stellar.linkSenderAuthSession.useMutation({
     onError: ClientTRPCErrorHandler,
   });
+  const transfer = api.transfers.getTransfer.useQuery(
+    {
+      id: String(transferId),
+    },
+    {
+      enabled: !!transferId && isReceiver,
+    },
+  );
 
   const features = [
     { icon: UserCheck, title: "Identity Verification" },
@@ -119,7 +135,7 @@ export default function Component() {
         transferId: transferId as string,
       });
       // Redirect to next page
-      window.location.href = `/kyc/${String(transferId)}`;
+      window.location.href = `/kyc/${String(transferId)}?${new URLSearchParams(searchParams).toString()}`;
       return sessionId;
     } catch (e) {
       console.error(e);
@@ -155,10 +171,25 @@ export default function Component() {
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     try {
       e.preventDefault();
+
+      if (isReceiver) {
+        setIsLoading(true);
+        if (!transfer.data?.recipientPhone) {
+          throw new Error("Recipient phone number is missing");
+        }
+        await newOtp.mutateAsync({ phone: transfer.data?.recipientPhone });
+        setAttempt((prev) => prev + 1);
+        clickFeedback("success");
+        toast.success("Verification code sent to your phone");
+        setIsLoading(false);
+        setStep(2);
+        setResendTimer(59); // Set initial resend timer
+      }
+
       if (phoneNumber.length >= 10) {
         setIsLoading(true);
-        // Simulate API call
         await newOtp.mutateAsync({ phone: phoneNumber });
+        setAttempt((prev) => prev + 1);
         clickFeedback("success");
         toast.success("Verification code sent to your phone");
         setIsLoading(false);
@@ -190,7 +221,9 @@ export default function Component() {
         setIsLoading(true);
         // Simulate API call
         const userRes = await verifyOtp.mutateAsync({
-          phone: phoneNumber,
+          phone: isReceiver
+            ? String(transfer.data?.recipientPhone)
+            : phoneNumber,
           otp: otp.join(""),
         });
         setUser(userRes);
@@ -219,6 +252,7 @@ export default function Component() {
 
   const handleResendOtp = async () => {
     try {
+      setAttempt((prev) => prev + 1);
       setIsLoading(true);
       await newOtp.mutateAsync({ phone: phoneNumber });
       setIsLoading(false);
@@ -235,14 +269,26 @@ export default function Component() {
         return (
           <div className="space-y-6">
             <div className="rounded-lg border border-[#3390EC] bg-[#E7F3FF] p-4">
-              <p className="text-sm leading-relaxed text-[#3390EC]">
-                Welcome! You&#39;re about to set up a secure way to send money
-                using just your phone. Here&#39;s what to expect:
-              </p>
+              {isReceiver ? (
+                <p className="text-sm leading-relaxed text-[#3390EC]">
+                  You have received a payment. Here&#39;s what to expect:
+                </p>
+              ) : (
+                <p className="text-sm leading-relaxed text-[#3390EC]">
+                  Welcome! You&#39;re about to set up a secure way to send money
+                  using just your phone. Here&#39;s what to expect:
+                </p>
+              )}
               <ol className="mt-2 list-inside list-decimal text-sm text-gray-700">
+                {isReceiver && (
+                  <li>You&#39;ll receive a code to verify your phone number</li>
+                )}
                 <li>We&#39;ll verify your identity</li>
-                <li>Secure your account with a unique passkey</li>
-                <li>You can then send money easily and securely</li>
+                {isReceiver ? (
+                  <li>Set up your account to receive the money</li>
+                ) : (
+                  <li>You can then send money easily and securely</li>
+                )}
               </ol>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -289,6 +335,51 @@ export default function Component() {
           </div>
         );
       case 1:
+        if (isReceiver) {
+          return (
+            <form onSubmit={handlePhoneSubmit}>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between space-x-2 text-sm text-gray-600">
+                    <span className="flex items-center justify-start gap-2">
+                      <Phone className="h-4 w-4" />
+                      6-digit code {attempt === 0 ? "will be" : ""} sent to:{" "}
+                      {transfer.data?.recipientPhone}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between space-x-2 text-sm text-gray-600">
+                    <span className="flex items-center justify-start gap-2">
+                      <UserIcon className="h-6 w-6" />
+                      This payment is intended for:{" "}
+                      {transfer.data?.recipientName}. We will need to verify
+                      your identity to complete the payment.
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  type="submit"
+                  onClick={() => clickFeedback()}
+                  className="group w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <span className="mr-2 animate-spin">⏳</span>
+                      Sending OTP...
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-light text-xs">
+                        Send Verification Code
+                      </p>
+                      <ExpandingArrow className="-ml-2 h-3.5 w-3.5" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          );
+        }
         return (
           <form onSubmit={handlePhoneSubmit}>
             <div className="space-y-4">
@@ -367,14 +458,16 @@ export default function Component() {
                 )}
               </Button>
               <div className="flex items-center justify-between">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleUpdatePhone}
-                >
-                  Update Number
-                  <PhoneCall className="ml-2 h-4 w-4" />
-                </Button>
+                {!isReceiver && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleUpdatePhone}
+                  >
+                    Update Number
+                    <PhoneCall className="ml-2 h-4 w-4" />
+                  </Button>
+                )}
                 <Button
                   type="button"
                   variant="outline"
@@ -437,15 +530,21 @@ export default function Component() {
         <CardHeader className="text-center">
           <CardTitle className="flex items-center justify-center text-2xl font-bold text-[#3390EC]">
             <Send className="mr-2 h-6 w-6 text-[#3390EC]" />
-            {step === 0 && "Just one more step"}
+            {step === 0 &&
+              (isReceiver ? "Your money is on the way" : "Just one more step")}
             {step === 1 && "Enter Your Phone Number"}
             {step === 2 && "Verify Your Phone"}
             {step === 3 && "Set Up Your Passkey"}
           </CardTitle>
           <p className="mt-2 text-sm text-gray-600">
-            {step === 0 && "Let's set up your account for easy money transfers"}
+            {step === 0 &&
+              (isReceiver
+                ? "Just a few clicks to receive your money"
+                : "Let's set up your account for easy money transfers")}
             {step === 1 &&
-              "We'll send you a one-time code to verify your number"}
+              (isReceiver
+                ? "We'll send a verification code to the phone number provided"
+                : "We'll send a verification code to verify your number")}
             {step === 2 && "Enter the 6-digit code we sent to your phone"}
             {step === 3 &&
               "Secure your account and enable easy money transfers"}

@@ -44,11 +44,13 @@ const KYCForm: FC = () => {
   });
   const [error, setError] = useState("");
 
+  const isReceiver = searchParams.get("receiver") === "true";
+
   useEffect(() => {
-    if (searchParams.get("type") !== "receiver") {
+    if (!isReceiver) {
       setSteps(["Personal Information", "Photo ID"]);
     }
-  }, [searchParams]);
+  }, [searchParams, isReceiver]);
 
   // tRPC handlers
   const putKyc = api.stellar.kyc.useMutation({
@@ -133,7 +135,7 @@ const KYCForm: FC = () => {
       clickFeedback("success");
       toast.success("Account Details Submitted!");
 
-      window.location.href = `/payment-link/${String(transferId)}`;
+      window.location.href = `/payment-link/${String(transferId)}?${new URLSearchParams(searchParams).toString()}`;
       // Here you would typically send the form data to your backend
     }
   };

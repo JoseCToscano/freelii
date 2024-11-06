@@ -21,7 +21,7 @@ import {
 import Link from "next/link";
 import { api } from "~/trpc/react";
 import { ClientTRPCErrorHandler } from "~/lib/utils";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -33,6 +33,7 @@ interface IBank {
   };
 }
 export default function Component() {
+  const searchParams = useSearchParams();
   const { transferId } = useParams();
 
   const transfer = api.stellar.getTransferData.useQuery(
@@ -194,7 +195,9 @@ export default function Component() {
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Link href={`/payment-link/${String(transferId)}`}>
+          <Link
+            href={`/payment-link/${String(transferId)}?${new URLSearchParams(searchParams).toString()}`}
+          >
             <Button variant="outline">Back</Button>
           </Link>
           <Link href={`/payment-link/${String(transferId)}/confirm`}>

@@ -10,11 +10,14 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { Badge } from "~/components/ui/badge";
 
 export default function Component() {
   const { transferId } = useParams();
+  const searchParams = useSearchParams();
+
+  const isReceiver = searchParams.get("receiver") === "true";
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
@@ -24,11 +27,14 @@ export default function Component() {
             Choose Payment Method
           </CardTitle>
           <CardDescription className="text-center">
-            Select how you&#39;d like to complete your transfer
+            Select how you&#39;d like to{" "}
+            {isReceiver ? "receive your transfer" : "complete your transfer"}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-1 space-y-6">
-          <Link href={`/payment-link/${String(transferId)}/bank-transfer`}>
+          <Link
+            href={`/payment-link/${String(transferId)}/bank-transfer?${new URLSearchParams(searchParams).toString()}`}
+          >
             <Button
               variant="outline"
               className="flex h-auto w-full items-center justify-start space-x-4 py-10"
@@ -38,12 +44,16 @@ export default function Component() {
               <div className="text-left">
                 <h3 className="font-semibold">Bank Transfer</h3>
                 <p className="text-sm text-muted-foreground">
-                  Pay using online banking or wire transfer
+                  {isReceiver
+                    ? "Receive funds directly to your bank account"
+                    : "Pay using online banking or wire transfer"}
                 </p>
               </div>
             </Button>
           </Link>
-          <Link href={`/payment-link/${String(transferId)}/cash`}>
+          <Link
+            href={`/payment-link/${String(transferId)}/${isReceiver ? "moneygram-collection" : "cash"}?${new URLSearchParams(searchParams).toString()}`}
+          >
             <Button
               variant="outline"
               className="flex h-auto w-full items-center justify-start space-x-4 py-10"
@@ -52,7 +62,7 @@ export default function Component() {
               <Banknote className="h-6 w-6" />
               <div className="text-left">
                 <h3 className="font-semibold">
-                  Cash Payment
+                  Cash {isReceiver ? "Collection" : "Payment"}
                   <Badge
                     className="ml-2 border-none bg-gradient-to-br from-[#3390EC] to-blue-300"
                     color="blue"
@@ -61,7 +71,9 @@ export default function Component() {
                   </Badge>
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Pay with cash at a local payment point
+                  {isReceiver
+                    ? "Pick up cash at a local collection point"
+                    : "Pay with cash at a local payment point"}
                 </p>
               </div>
             </Button>

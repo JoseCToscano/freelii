@@ -36,8 +36,6 @@ export default function RootLayout({
         if (requiresAuth) {
           window.Telegram.WebApp.ready();
           // Access the user data from Telegram
-          const userData = window.Telegram.WebApp.initDataUnsafe?.user;
-          toast.success(`userData ${JSON.stringify(userData)}`);
         }
       })
       .catch((err) => {
