@@ -80,7 +80,7 @@ export default function Component() {
   const saveAuth = api.stellar.saveAuthSession.useMutation({
     onError: ClientTRPCErrorHandler,
   });
-  const linkSenderAuthSession = api.stellar.linkSenderAuthSession.useMutation({
+  const linkAuthSession = api.stellar.linkAuthSession.useMutation({
     onError: ClientTRPCErrorHandler,
   });
   const transfer = api.transfers.getTransfer.useQuery(
@@ -124,9 +124,10 @@ export default function Component() {
         sessionId: sessionId,
         token,
       });
-      await linkSenderAuthSession.mutateAsync({
+      await linkAuthSession.mutateAsync({
         authSessionId: sessionId,
         transferId: transferId as string,
+        type: isReceiver ? "receiver" : "sender",
       });
       // Redirect to next page
       window.location.href = `/kyc/${String(transferId)}?${new URLSearchParams(searchParams).toString()}`;

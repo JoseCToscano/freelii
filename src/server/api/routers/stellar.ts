@@ -375,11 +375,12 @@ export const stellarRouter = createTRPCRouter({
 
       return { url, config };
     }),
-  linkSenderAuthSession: publicProcedure
+  linkAuthSession: publicProcedure
     .input(
       z.object({
         authSessionId: z.number(),
         transferId: z.string(),
+        type: z.string(), // "sender" | "receiver"
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -396,11 +397,20 @@ export const stellarRouter = createTRPCRouter({
         where: { id: input.authSessionId },
       });
 
-      await ctx.db.transfer.update({
-        where: { id: input.transferId },
-        data: {
-          senderAuthSessionId: authSession.id,
-        },
-      });
+      if (input.type === "receiver") {
+        await ctx.db.transfer.update({
+          where: { id: input.transferId },
+          data: {
+            receiverAuthSessionId: authSession.id,
+          },
+        });
+      } else {
+        await ctx.db.transfer.update({
+          where: { id: input.transferId },
+          data: {
+            senderAuthSessionId: authSession.id,
+          },
+        });
+      }
     }),
 });
