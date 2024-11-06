@@ -122,7 +122,7 @@ const KYCForm: FC = () => {
         if (photo_id_back) {
           formData.append("photo_id_back", photo_id_back);
         }
-        await axios.put(url, formData, config);
+        await axios.put(url, formData, config).catch(() => setLoading(false));
         setLoading(false);
       } catch (e) {
         setLoading(false);
