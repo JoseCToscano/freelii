@@ -39,7 +39,7 @@ Freelii leverages the Stellar blockchain to provide a secure, efficient solution
 
 - Authentication & Verification: Uses Stellar Demo Anchor's SEP-10 for secure login and SEP-12 for KYC verification.
 - Currency Conversion: Provides exchange capabilities using SEP-38 for real-time quotes.
-- Transaction Management: Manages payments using SEP-31, with enhanced security and optimized processes. We explored SEP-6 for deposit and withdrawal functionalities, though it’s not yet widely adopted.
+- Transaction Management: Manages payments using SEP-31, with enhanced security and optimized processes. We also explored SEP-6 and SEP-24 for deposit and withdrawal functionalities.
 
 _Freelii also includes a demonstration of MoneyGram’s cash and bank deposit options, awaiting final integration approval._
 
