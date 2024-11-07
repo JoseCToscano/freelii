@@ -6,7 +6,7 @@ Freelii is a modern platform designed to make secure cross-border payments and a
 Our primary goal is to deliver cross-border payment rails for non-crypto users, eliminating as much industry jargon as possible—even common terms like OTP or KYC are minimized. We focused on creating an experience that feels as familiar and straightforward as sending a text message, allowing users to access financial tools without complexity or barriers.
 ## Features
 - Cross-Border Payments: Transfer assets across different currencies and locations using Stellar's SEP standards.
-- Chatbot Integration: Accessible via [FreeliiBot](https://t.me/Freelibot) on Telegram, allowing users to interact with the platform directly from their messaging app.
+- Chatbot Integration: Accessible via [FreeliiBot](https://t.me/FreeliBot) on Telegram, allowing users to interact with the platform directly from their messaging app.
 - Automated Currency Exchange: Supports Stellar assets and off-chain currency conversion, allowing users to transact seamlessly between different assets.
 
 ## Demo
