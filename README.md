@@ -62,4 +62,7 @@ We envision future iterations of Freelii incorporating Soroban smart contracts m
 - SEP Protocols: SEP-10 for authentication, SEP-12 for KYC, SEP-31 for payments, and SEP-38 for currency quotes.
 
 ## License
-This project is licensed under the MIT License.
+
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)
+
