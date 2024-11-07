@@ -13,6 +13,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function FreeliiLandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -62,26 +63,26 @@ export default function FreeliiLandingPage() {
                 )}
               </Button>
             </div>
-            <nav className="hidden space-x-10 md:flex">
-              <a
-                href="#"
-                className="text-base font-medium text-gray-500 hover:text-gray-900"
-              >
-                How It Works
-              </a>
-              <a
-                href="#"
-                className="text-base font-medium text-gray-500 hover:text-gray-900"
-              >
-                Features
-              </a>
-              <a
-                href="#"
-                className="text-base font-medium text-gray-500 hover:text-gray-900"
-              >
-                Contact
-              </a>
-            </nav>
+            {/*<nav className="hidden space-x-10 md:flex">*/}
+            {/*  <a*/}
+            {/*    href="#"*/}
+            {/*    className="text-base font-medium text-gray-500 hover:text-gray-900"*/}
+            {/*  >*/}
+            {/*    How It Works*/}
+            {/*  </a>*/}
+            {/*  <a*/}
+            {/*    href="#"*/}
+            {/*    className="text-base font-medium text-gray-500 hover:text-gray-900"*/}
+            {/*  >*/}
+            {/*    Features*/}
+            {/*  </a>*/}
+            {/*  <a*/}
+            {/*    href="#"*/}
+            {/*    className="text-base font-medium text-gray-500 hover:text-gray-900"*/}
+            {/*  >*/}
+            {/*    Contact*/}
+            {/*  </a>*/}
+            {/*</nav>*/}
           </div>
         </div>
       </header>
@@ -94,28 +95,35 @@ export default function FreeliiLandingPage() {
               <main className="mx-auto mt-10 max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
                 <div className="sm:text-center lg:text-left">
                   <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
-                    <span className="block xl:inline">Collect your money</span>{" "}
+                    <span className="block xl:inline">
+                      Send and receive money
+                    </span>{" "}
                     <span className="block text-[#3390EC] xl:inline">
                       anywhere, anytime
                     </span>
                   </h1>
                   <p className="mt-3 text-base text-gray-500 sm:mx-auto sm:mt-5 sm:max-w-xl sm:text-lg md:mt-5 md:text-xl lg:mx-0">
-                    Freelii makes it easy to collect cash payments from around
-                    the world. As simple as sending a text message.
+                    With Freelli, collecting money from loved ones abroad is as
+                    easy as sending a text message. Secure, fast, and accessible
+                    worldwide.
                   </p>
                   <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                     <div className="rounded-md shadow">
-                      <Button className="flex w-full items-center justify-center rounded-md border border-transparent bg-[#3390EC] px-8 py-3 text-base font-medium text-white hover:bg-[#2980d9] md:px-10 md:py-4 md:text-lg">
-                        Get started
-                      </Button>
+                      <Link href={"https://t.me/FreeliiBot"}>
+                        <Button className="flex w-full items-center justify-center rounded-md border border-transparent bg-[#3390EC] px-8 py-3 text-base font-medium text-white hover:bg-[#2980d9] md:px-10 md:py-4 md:text-lg">
+                          Get started
+                        </Button>
+                      </Link>
                     </div>
                     <div className="mt-3 sm:ml-3 sm:mt-0">
-                      <Button
-                        variant="outline"
-                        className="flex w-full items-center justify-center rounded-md border border-transparent px-8 py-3 text-base font-medium md:px-10 md:py-4 md:text-lg"
-                      >
-                        Learn more
-                      </Button>
+                      <Link href={"/transfer-preview"}>
+                        <Button
+                          variant="outline"
+                          className="flex w-full items-center justify-center rounded-md border border-transparent px-8 py-3 text-base font-medium md:px-10 md:py-4 md:text-lg"
+                        >
+                          Start a transfer
+                        </Button>
+                      </Link>
                     </div>
                   </div>
                 </div>
