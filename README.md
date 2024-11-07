@@ -46,11 +46,11 @@ _Freelii also includes a demonstration of MoneyGram’s cash and bank deposit op
 ## Development Journey and Challenges
 The Freelii development journey involved leveraging Stellar's SEP standards and testing integrations to create a robust, user-friendly app. Here are some notable development insights:
 
-- Passkeys Integration: We implemented a passkey system for secure account access, enabling users to sign transactions seamlessly. Our future premium feature, One-Click On-Boarding, aims to allow users to access their accounts without passwords, enhancing user convenience without sacrificing security.
+- Passkeys Integration: We implemented a passkey integration for secure account access, enabling users to manage their accounts securely and as seamless as possible. Our future premium feature, One-Click On-Boarding (coming-soon),  aims to allow users to access their accounts without passwords, enhancing user convenience without sacrificing security.
 
 - Soroban Smart Contracts: Initially, we prototyped an escrow smart contract with Soroban. This escrow holds funds until both parties confirm transaction completion, adding security for transactions with new contacts. We hope to fully integrate Soroban contracts in the future for even more control and automation within the platform.
 
-Our goal throughout was to abstract complex blockchain concepts, making Freelii accessible and easy to use for all. This required several workarounds and adjustments as we explored SEP compatibility, particularly with SEP-31 and passkey integration.
+Our goal throughout was to abstract complex blockchain concepts, making Freelii accessible and easy to use for all. This required several workarounds and adjustments as we explored SEP compatibility, particularly with SEP-31, Soroban and the very recent Passkey integration.
 
 #### What's Next?
 
