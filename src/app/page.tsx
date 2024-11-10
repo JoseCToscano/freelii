@@ -133,7 +133,7 @@ export default function FreeliiLandingPage() {
           <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
             <Image
               className="h-56 w-full rounded-full object-cover pl-10 sm:h-72 md:h-96 lg:h-full lg:w-full"
-              src="/c.jpg"
+              src="https://utfs.io/f/XoQ2oTl97RNofKKtaSvvK4Vy1iGxaJB3jLouYElI9AcmZ0Pt"
               width={700}
               height={800}
               alt="Telegram"
@@ -263,7 +263,7 @@ export default function FreeliiLandingPage() {
               <div className="relative -mx-4 mt-10 lg:mt-0" aria-hidden="true">
                 <Image
                   className="h-32 w-full object-cover pl-10 sm:h-72 md:h-96 lg:h-full lg:w-full"
-                  src="/b.jpg"
+                  src="https://utfs.io/f/XoQ2oTl97RNoDcKIF4M9p3S0f8HaCi9BdMbquArxgtIjZT5Q"
                   width={490}
                   height={490}
                   alt="Person collecting money"
@@ -326,7 +326,7 @@ export default function FreeliiLandingPage() {
                 <div className="relative -mx-4 mt-10 lg:col-start-1 lg:mt-0">
                   <Image
                     className="h-32 w-full object-cover pl-10 sm:h-72 md:h-96 lg:h-full lg:w-full"
-                    src="/a.jpg"
+                    src="https://utfs.io/f/XoQ2oTl97RNoDcKIF4M9p3S0f8HaCi9BdMbquArxgtIjZT5Q"
                     width={490}
                     height={490}
                     alt="Person collecting money"
