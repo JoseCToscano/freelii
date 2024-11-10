@@ -19,6 +19,11 @@ const config = {
         hostname: "api.qrserver.com",
         pathname: "**",
       },
+      {
+        protocol: "https",
+        hostname: "utfs.io",
+        pathname: "/a/unuqixk6du",
+      },
     ],
   },
 };
