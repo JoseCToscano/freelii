@@ -326,7 +326,7 @@ export default function FreeliiLandingPage() {
                 <div className="relative -mx-4 mt-10 lg:col-start-1 lg:mt-0">
                   <Image
                     className="h-32 w-full object-cover pl-10 sm:h-72 md:h-96 lg:h-full lg:w-full"
-                    src="https://utfs.io/f/XoQ2oTl97RNoDcKIF4M9p3S0f8HaCi9BdMbquArxgtIjZT5Q"
+                    src="https://utfs.io/f/XoQ2oTl97RNojzNdlxOAzQuBvS3dkMxDmC1cbhNXjGErVsop"
                     width={490}
                     height={490}
                     alt="Person collecting money"
