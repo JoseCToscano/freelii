@@ -4,6 +4,7 @@ import {
   type PrismaClient,
   type TransferStatus,
 } from "@prisma/client";
+import { CircleService } from "~/server/services/circle/CircleService";
 
 interface INewTransfer {
   amount: number;
@@ -79,7 +80,7 @@ export class TransferService {
   }
 
   async getTransfer(id: string) {
-    return this.db.transfer.findUnique({
+    const t = this.db.transfer.findUnique({
       where: {
         id,
       },
@@ -87,11 +88,18 @@ export class TransferService {
         sender: true,
       },
     });
+    console.log("t:", t);
+    return t;
   }
 
   async createTransfer(dto: INewTransfer) {
     console.log("dto", dto);
-    return this.db.transfer.create({
+    const circleService = new CircleService(this.db);
+    const quoteSession = await circleService.createQuoteSession({
+      amount: dto.amount,
+    });
+    console.log(quoteSession.id);
+    const transfer = await this.db.transfer.create({
       data: {
         amount: dto.amount,
         currency: dto.currency,
@@ -99,8 +107,11 @@ export class TransferService {
         recipientPhone: dto.recipientPhone,
         recipientName: dto.recipientName,
         status: dto.status,
+        circleSessionId: quoteSession.id,
       },
     });
+    console.log("transfer", transfer);
+    return transfer;
   }
 
   async fillBankDetails(bankTransferId: string, dto: IBankDetails) {

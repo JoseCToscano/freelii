@@ -115,7 +115,7 @@ export default function Component() {
       clickFeedback("success");
       toast.success("Looking good! Just a few more steps to go.");
 
-      window.location.href = `/welcome/${String(tx.id)}?${new URLSearchParams(searchParams).toString()}`;
+      window.location.href = `/onboarding/${String(tx.id)}?${new URLSearchParams(searchParams).toString()}`;
     }
   };
 

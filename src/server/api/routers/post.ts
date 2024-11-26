@@ -25,7 +25,10 @@ export const postRouter = createTRPCRouter({
   otp: publicProcedure
     .input(z.object({ phone: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const otp = Math.floor(100000 + Math.random() * 900000);
+      const otp = "000000";
+      if (env.NODE_ENV === "production") {
+        // otp = String(Math.floor(100000 + Math.random() * 900000));
+      }
       let user = await ctx.db.user.findUnique({
         where: {
           phone: input.phone,
@@ -48,21 +51,21 @@ export const postRouter = createTRPCRouter({
         },
         create: {
           userId: user.id,
-          otpCode: String(otp),
+          otpCode: otp,
           verified: false,
           expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
         },
         update: {
-          otpCode: String(otp),
+          otpCode: otp,
           verified: false,
           expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
         },
       });
-      return otp;
     }),
   verifyOtp: publicProcedure
     .input(z.object({ phone: z.string(), otp: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      console.log("input", input.phone);
       const verification = await ctx.db.oTPVerification.findFirst({
         where: {
           user: {

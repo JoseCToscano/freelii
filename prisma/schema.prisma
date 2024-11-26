@@ -30,6 +30,7 @@ model User {
   KYC               KYC[]
   HostedDeposits    HostedDeposits[]
   HostedWithdrawals HostedWithdrawals[]
+  CircleSession     CircleSession[]
 
   @@index([telegramId], name: "telegram_idx")
   @@index([phone], name: "phone_idx")
@@ -123,6 +124,8 @@ model Transfer {
   recipientCountry       String?
   senderAuthSessionId    Int?
   receiverAuthSessionId  Int?
+  circleSessionId        String?
+  CircleSession          CircleSession?      @relation(fields: [circleSessionId], references: [id])
   // Recipient Bank details
   recipientAddress       String? // Address of the recipient
   recipientBankName      String? // Name of the recipient's bank
@@ -141,6 +144,26 @@ model Transfer {
   @@index([senderId], name: "sender_idx")
   @@index([senderAuthSessionId], name: "sender_auth_session_idx")
   @@index([receiverAuthSessionId], name: "receiver_auth_session_idx")
+}
+
+model CircleSession {
+  id                String     @id
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  Transfer          Transfer[]
+  blockchain        String
+  paymentMethodType String
+  fiatAmount        Decimal
+  fiatCurrency      String
+  cryptoAmount      Decimal
+  cryptoCurrency    String
+  partnerName       String
+  exchangeRate      Decimal
+  exchangePair      String
+  createDate        DateTime
+  expireDate        DateTime
+  User              User?      @relation(fields: [userId], references: [id])
+  userId            Int?
 }
 
 // OTPVerification model

@@ -8,6 +8,7 @@ export const env = createEnv({
    */
   server: {
     DATABASE_URL: z.string().url(),
+    CIRCLE_API_KEY: z.string(),
     TELEGRAM_BOT_TOKEN: z.string(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
@@ -27,6 +28,7 @@ export const env = createEnv({
     MERCURY_JWT: z.string(),
     SRT_ASSET_ID: z.string(),
     ENABLE_SMS: z.string(),
+    FRONTEND_URL: z.string().url(),
   },
 
   /**
@@ -71,6 +73,8 @@ export const env = createEnv({
     NEXT_PUBLIC_NETWORK_PASSPHRASE: process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE,
     SRT_ASSET_ID: process.env.SRT_ASSET_ID,
     ENABLE_SMS: process.env.ENABLE_SMS,
+    CIRCLE_API_KEY: process.env.CIRCLE_API_KEY,
+    FRONTEND_URL: process.env.FRONTEND_URL,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
