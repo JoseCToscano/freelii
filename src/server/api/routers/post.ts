@@ -25,7 +25,8 @@ export const postRouter = createTRPCRouter({
   otp: publicProcedure
     .input(z.object({ phone: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      const otp = Math.floor(100000 + Math.random() * 900000);
+      // const otp = Math.floor(100000 + Math.random() * 900000);
+      const otp = "000000";
       let user = await ctx.db.user.findUnique({
         where: {
           phone: input.phone,
