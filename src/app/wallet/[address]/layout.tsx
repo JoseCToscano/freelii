@@ -1,0 +1,187 @@
+"use client";
+import { Button } from "~/components/ui/button";
+import { FC, ReactNode, useState } from "react";
+import { useHapticFeedback } from "~/hooks/useHapticFeedback";
+import { useQRScanner } from "~/hooks/useQRScanner";
+import { CardContent, CardHeader } from "~/components/ui/card";
+import {
+  ArrowUpIcon,
+  Camera,
+  Copy,
+  Download,
+  Eye,
+  EyeOff,
+  Send,
+} from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { copyToClipboard, shortStellarAddress } from "~/lib/utils";
+import { api } from "~/trpc/react";
+import { NetworkSelector } from "~/app/wallet/_components/network-selector";
+
+const WalletLayout: FC<{ children?: ReactNode }> = ({ children }) => {
+  const { address } = useParams();
+
+  const [isBalanceHidden, setIsBalanceHidden] = useState(false);
+  const [showQR, setShowQR] = useState(false);
+  const [showSendMoneyForm, setShowSendMoneyForm] = useState(false);
+
+  const { clickFeedback } = useHapticFeedback();
+  const { scan } = useQRScanner();
+  const toggleBalanceVisibility = () => {
+    setIsBalanceHidden((prev) => !prev);
+  };
+
+  const balance = { data: "1000.0000" };
+
+  const onLogout = () => {
+    clickFeedback();
+    alert("Logout clicked!");
+  };
+
+  const handlePasskeyDetection = async () => {
+    try {
+      // Simulate a random challenge from your server
+      const challenge = new Uint8Array(32);
+      window.crypto.getRandomValues(challenge);
+
+      const options: PublicKeyCredentialRequestOptions = {
+        challenge,
+        rpId: window.location.hostname, // Use the current domain
+        timeout: 60000, // 1 minute timeout
+        userVerification: "preferred", // 'required', 'preferred', or 'discouraged'
+      };
+
+      const credential = await navigator.credentials.get({
+        publicKey: options,
+      });
+
+      if (credential) {
+        console.log("Passkey found:", credential);
+        alert("Passkey is available and was selected!");
+      } else {
+        alert("No passkeys available.");
+      }
+    } catch (error) {
+      console.error("Error detecting passkeys:", error);
+      alert("An error occurred or no passkeys were found.");
+    }
+  };
+  return (
+    <>
+      <CardHeader className="flex flex-row items-center justify-between space-y-1">
+        <Button
+          onClick={onLogout}
+          variant="ghost"
+          size="icon"
+          aria-label="Scan QR Code"
+          className="font-semibold text-zinc-500 hover:text-zinc-700"
+        >
+          Logout
+        </Button>
+
+        <Button
+          onClick={scan}
+          variant="ghost"
+          size="icon"
+          aria-label="Scan QR Code"
+          className="border-[1px] border-zinc-300 text-zinc-500 hover:text-zinc-700"
+        >
+          <Camera className="h-4 w-4" />
+        </Button>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <NetworkSelector />
+
+        <div className="rounded-lg bg-zinc-50 p-6 text-center">
+          <h2 className="mb-2 text-sm font-medium text-zinc-500">
+            Current Balance
+          </h2>
+
+          <div className="flex items-center justify-center space-x-2">
+            <p className="text-4xl font-bold text-zinc-900">
+              {isBalanceHidden ? "•••••" : (balance.data ?? "-")} BNB
+            </p>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleBalanceVisibility}
+              className="text-zinc-500 hover:text-zinc-700"
+            >
+              {isBalanceHidden ? (
+                <Eye className="h-5 w-5" />
+              ) : (
+                <EyeOff className="h-5 w-5" />
+              )}
+              <span className="sr-only">
+                {isBalanceHidden ? "Show balance" : "Hide balance"}
+              </span>
+            </Button>
+          </div>
+          {/* Copy to clipboard */}
+          <Button
+            variant="ghost"
+            onClick={() => {
+              copyToClipboard(String(address));
+            }}
+            className="text-zinc-500 hover:text-zinc-700"
+          >
+            {shortStellarAddress(String(address), [12, 0])}
+            <Copy className="h-3 w-3" />
+            <span className="sr-only">Copy address</span>
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Link
+            className="w-full"
+            href={`/wallet/${String(address)}/${showSendMoneyForm ? "" : "send"}`}
+          >
+            <Button
+              className="w-full bg-zinc-800 py-6 text-lg text-white transition-colors duration-300 hover:bg-zinc-900"
+              size="lg"
+              onClick={() => {
+                setShowQR(false);
+                setShowSendMoneyForm(!showSendMoneyForm);
+              }}
+            >
+              {!showSendMoneyForm ? (
+                <Send className="mr-2 h-5 w-5" />
+              ) : (
+                <ArrowUpIcon className="mr-2 h-5 w-5" />
+              )}
+              {showSendMoneyForm ? "Hide" : "Send"}
+            </Button>
+          </Link>
+          <Link
+            className="w-full"
+            href={`/wallet/${String(address)}/${showQR ? "" : "receive"}`}
+          >
+            <Button
+              className="w-full bg-zinc-800 py-6 text-lg text-white transition-colors duration-300 hover:bg-zinc-900"
+              size="lg"
+              onClick={() => {
+                setShowSendMoneyForm(false);
+                setShowQR(!showQR);
+              }}
+            >
+              {!showQR ? (
+                <Download className="mr-2 h-5 w-5" />
+              ) : (
+                <ArrowUpIcon className="mr-2 h-5 w-5" />
+              )}
+              {showQR ? "Hide QR" : "Receive"}
+            </Button>
+          </Link>
+        </div>
+
+        <p className="mt-4 text-center text-xs text-zinc-500">
+          Last updated: 2 minutes ago
+        </p>
+        {children}
+      </CardContent>
+    </>
+  );
+};
+
+export default WalletLayout;
