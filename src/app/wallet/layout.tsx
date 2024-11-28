@@ -19,7 +19,9 @@ export default function RootLayout({
         <Card className="w-full max-w-md border-0 bg-white shadow-lg">
           {children}
         </Card>
-        <span className="mt-4 text-xs text-zinc-500">Arturito • ©2024</span>
+        <span className="mt-4 text-xs text-zinc-500">
+          © Freelii, All rights reserved.
+        </span>
       </div>
     </div>
   );

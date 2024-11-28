@@ -12,11 +12,11 @@ import {
   Eye,
   EyeOff,
   Send,
+  RefreshCcw,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { copyToClipboard, shortStellarAddress } from "~/lib/utils";
-import { api } from "~/trpc/react";
 import { NetworkSelector } from "~/app/wallet/_components/network-selector";
 
 const WalletLayout: FC<{ children?: ReactNode }> = ({ children }) => {
@@ -32,7 +32,7 @@ const WalletLayout: FC<{ children?: ReactNode }> = ({ children }) => {
     setIsBalanceHidden((prev) => !prev);
   };
 
-  const balance = { data: "1000.0000" };
+  const balance = { data: "250.00" };
 
   const onLogout = () => {
     clickFeedback();
@@ -73,7 +73,6 @@ const WalletLayout: FC<{ children?: ReactNode }> = ({ children }) => {
         <Button
           onClick={onLogout}
           variant="ghost"
-          size="icon"
           aria-label="Scan QR Code"
           className="font-semibold text-zinc-500 hover:text-zinc-700"
         >
@@ -81,7 +80,7 @@ const WalletLayout: FC<{ children?: ReactNode }> = ({ children }) => {
         </Button>
 
         <Button
-          onClick={scan}
+          onClick={() => scan()}
           variant="ghost"
           size="icon"
           aria-label="Scan QR Code"
@@ -94,14 +93,9 @@ const WalletLayout: FC<{ children?: ReactNode }> = ({ children }) => {
         <NetworkSelector />
 
         <div className="rounded-lg bg-zinc-50 p-6 text-center">
-          <h2 className="mb-2 text-sm font-medium text-zinc-500">
+          <h2 className="mb-2 flex items-center justify-center text-sm font-medium text-zinc-500">
             Current Balance
-          </h2>
-
-          <div className="flex items-center justify-center space-x-2">
-            <p className="text-4xl font-bold text-zinc-900">
-              {isBalanceHidden ? "•••••" : (balance.data ?? "-")} BNB
-            </p>
+            {/* Visibility Toggle */}
             <Button
               variant="ghost"
               size="icon"
@@ -109,27 +103,25 @@ const WalletLayout: FC<{ children?: ReactNode }> = ({ children }) => {
               className="text-zinc-500 hover:text-zinc-700"
             >
               {isBalanceHidden ? (
-                <Eye className="h-5 w-5" />
+                <Eye className="h-4 w-4" />
               ) : (
-                <EyeOff className="h-5 w-5" />
+                <EyeOff className="h-4 w-4" />
               )}
               <span className="sr-only">
                 {isBalanceHidden ? "Show balance" : "Hide balance"}
               </span>
             </Button>
+          </h2>
+
+          <div className="flex justify-center">
+            {/* Centered Amount */}
+            <div className="flex items-baseline">
+              <p className="text-4xl font-bold text-zinc-900">
+                {isBalanceHidden ? "•••••" : (balance.data ?? "-")}
+              </p>
+              <span className="ml-2 font-mono text-xl text-zinc-500">USDc</span>
+            </div>
           </div>
-          {/* Copy to clipboard */}
-          <Button
-            variant="ghost"
-            onClick={() => {
-              copyToClipboard(String(address));
-            }}
-            className="text-zinc-500 hover:text-zinc-700"
-          >
-            {shortStellarAddress(String(address), [12, 0])}
-            <Copy className="h-3 w-3" />
-            <span className="sr-only">Copy address</span>
-          </Button>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -175,8 +167,16 @@ const WalletLayout: FC<{ children?: ReactNode }> = ({ children }) => {
           </Link>
         </div>
 
-        <p className="mt-4 text-center text-xs text-zinc-500">
+        <p className="flex items-center justify-center text-center text-xs text-zinc-500">
           Last updated: 2 minutes ago
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleBalanceVisibility}
+            className="text-zinc-500 hover:text-zinc-700"
+          >
+            <RefreshCcw className="h-2 w-2" />
+          </Button>
         </p>
         {children}
       </CardContent>

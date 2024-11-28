@@ -2,9 +2,10 @@
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Camera, Send } from "lucide-react";
+import { ArrowRight, Camera, Send } from "lucide-react";
 import { useState } from "react";
 import { useQRScanner } from "~/hooks/useQRScanner";
+import ExpandingArrow from "~/components/ui/expanding-arrow";
 
 export default function SendMoneyForm() {
   const [amount, setAmount] = useState("");
@@ -59,14 +60,14 @@ export default function SendMoneyForm() {
       </div>
 
       <Button
-        className="w-full bg-zinc-800 py-6 text-lg text-white transition-colors duration-300 hover:bg-zinc-900"
+        className="group w-full bg-zinc-800 py-6 text-lg text-white transition-colors duration-300 hover:bg-zinc-900"
         size="lg"
       >
-        <Send className="mr-2 h-5 w-5" />
-        Send Money
+        Preview Transfer
+        <ExpandingArrow className="-ml-2 h-3.5 w-3.5" />
       </Button>
 
-      <p className="text-center text-xs text-zinc-500">
+      <p className="-translate-y-4 text-center text-xs text-zinc-500">
         By sending, you agree to the terms of service and privacy policy.
       </p>
     </div>
