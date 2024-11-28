@@ -6,6 +6,7 @@ import { ArrowRight, Camera, Send } from "lucide-react";
 import { useState } from "react";
 import { useQRScanner } from "~/hooks/useQRScanner";
 import ExpandingArrow from "~/components/ui/expanding-arrow";
+import VerificationForm from "~/app/wallet/[address]/send/_components/phone-mail-input";
 
 export default function SendMoneyForm() {
   const [amount, setAmount] = useState("");
@@ -56,6 +57,12 @@ export default function SendMoneyForm() {
               <span className="sr-only">Scan QR Code</span>
             </Button>
           </div>
+          <VerificationForm
+            phoneNumber={"+523313415550"}
+            setPhoneNumber={(a: string) => {
+              return null;
+            }}
+          />
         </div>
       </div>
 
