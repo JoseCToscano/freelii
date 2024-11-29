@@ -52,15 +52,13 @@ export default function RootLayout({
   }, []); // Empty dependency array ensures it runs only once on initial load
 
   return (
-    <div>
-      <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-100 p-4">
-        <Card className="w-full max-w-md border-0 bg-white shadow-lg">
-          <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
-        </Card>
-        <span className="mt-4 text-xs text-zinc-500">
-          © Freelii, All rights reserved.
-        </span>
-      </div>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-100 p-4">
+      <Card className="w-full max-w-md border-0 bg-white shadow-lg">
+        <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+      </Card>
+      <span className="mt-4 text-xs text-zinc-500">
+        © Freelii, All rights reserved.
+      </span>
     </div>
   );
 }

@@ -135,7 +135,7 @@ const WalletLayout: FC<{ children?: ReactNode }> = ({ children }) => {
               href={`/wallet/${String(address)}/${showSendMoneyForm ? "" : "send"}`}
             >
               <Button
-                className="w-full bg-zinc-800 py-6 text-lg text-white transition-colors duration-300 hover:bg-zinc-900"
+                className="w-full"
                 size="lg"
                 onClick={() => {
                   clickFeedback("soft");
@@ -156,7 +156,7 @@ const WalletLayout: FC<{ children?: ReactNode }> = ({ children }) => {
               href={`/wallet/${String(address)}/${showQR ? "" : "receive"}`}
             >
               <Button
-                className="w-full bg-zinc-800 py-6 text-lg text-white transition-colors duration-300 hover:bg-zinc-900"
+                className="w-full"
                 size="lg"
                 onClick={() => {
                   clickFeedback("soft");

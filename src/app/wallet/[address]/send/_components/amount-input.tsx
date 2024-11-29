@@ -2,6 +2,7 @@
 import { type FC, useState, useRef } from "react";
 import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
+import { useHapticFeedback } from "~/hooks/useHapticFeedback";
 
 interface AmountInputProps {
   value?: number | string;
@@ -16,6 +17,7 @@ const AmountInput: FC<AmountInputProps> = ({
   placeholder = "0.00",
   className,
 }) => {
+  const { clickFeedback } = useHapticFeedback();
   const [inputValue, setInputValue] = useState(
     value !== undefined ? (Number(value) * 100).toFixed(0) : "", // Store in cents
   );
@@ -32,6 +34,7 @@ const AmountInput: FC<AmountInputProps> = ({
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    clickFeedback("soft");
     const rawValue = event.target.value.replace(/[^\d]/g, ""); // Keep only digits
     setInputValue(rawValue);
 
@@ -59,7 +62,7 @@ const AmountInput: FC<AmountInputProps> = ({
       </span>
       <Input
         id="amount"
-        type="text"
+        type="tel"
         value={formatAmount(inputValue)}
         onChange={handleChange}
         onFocus={handleFocus}

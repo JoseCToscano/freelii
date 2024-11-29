@@ -2,12 +2,10 @@
 
 import { type FC, useState, useRef } from "react";
 import { Button } from "~/components/ui/button";
-import { CardFooter } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useHapticFeedback } from "~/hooks/useHapticFeedback";
-import ExpandingArrow from "~/components/ui/expanding-arrow";
 import {
   Command,
   CommandEmpty,
@@ -41,6 +39,7 @@ const VerificationForm: FC = () => {
   };
 
   const handlePhoneKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    clickFeedback("soft");
     if (event.key === "Backspace" && phoneInputRef.current) {
       const input = phoneInputRef.current;
       if (input?.value.length === 4 || input?.value.length === 8) {
@@ -57,8 +56,12 @@ const VerificationForm: FC = () => {
     >
       <div className="flex gap-1">
         <TabsList className="mb-6 grid w-full grid-cols-2">
-          <TabsTrigger value="phone">Phone Number</TabsTrigger>
-          <TabsTrigger value="email">Email</TabsTrigger>
+          <TabsTrigger value="phone" onClick={() => clickFeedback("medium")}>
+            Phone Number
+          </TabsTrigger>
+          <TabsTrigger value="email" onClick={() => clickFeedback("medium")}>
+            Email
+          </TabsTrigger>
         </TabsList>
         <Button
           onClick={() => {
@@ -101,6 +104,7 @@ const VerificationForm: FC = () => {
                         <CommandItem
                           key={country.value}
                           onSelect={() => {
+                            clickFeedback("medium");
                             setSelectedCountry(country);
                             setOpen(false);
                           }}

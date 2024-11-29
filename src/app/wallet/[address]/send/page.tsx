@@ -83,7 +83,7 @@ export default function SendMoneyForm() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="address">Send money to any contact</Label>
@@ -104,15 +104,11 @@ export default function SendMoneyForm() {
         </div>
       </div>
 
-      <Button
-        className="group w-full bg-zinc-800 py-6 text-lg text-white transition-colors duration-300 hover:bg-zinc-900"
-        size="lg"
-        onClick={handlePreview}
-      >
+      <Button className="group w-full" size="lg" onClick={handlePreview}>
         Preview Transfer
         <ExpandingArrow className="-ml-2 h-3.5 w-3.5" />
       </Button>
-      <Disclaimer />
+      <Disclaimer className="" />
     </div>
   );
 }

@@ -1,8 +1,13 @@
 import Link from "next/link";
+import { FC } from "react";
+import { cn } from "~/lib/utils";
 
-const Disclaimer = () => {
+interface Props {
+  className?: string;
+}
+const Disclaimer: FC<Props> = ({ className }) => {
   return (
-    <p className="text-xs text-muted-foreground">
+    <p className={cn("text-xs text-muted-foreground", className)}>
       By continuing, you agree to our{" "}
       <Link href="/terms">
         <span className="text-blue-500">Terms of Service</span>

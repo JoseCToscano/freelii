@@ -60,7 +60,7 @@ const PreviewTransfer: FC<Props> = ({ handleGoBack }) => {
           className="w-full"
           size="lg"
           onClick={() => {
-            clickFeedback();
+            clickFeedback("success");
           }}
         >
           Confirm Transfer
