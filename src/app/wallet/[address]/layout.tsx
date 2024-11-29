@@ -1,26 +1,20 @@
 "use client";
 import { Button } from "~/components/ui/button";
-import { FC, ReactNode, useState } from "react";
+import { type FC, ReactNode, useState } from "react";
 import { useHapticFeedback } from "~/hooks/useHapticFeedback";
 import { useQRScanner } from "~/hooks/useQRScanner";
 import { CardContent, CardHeader } from "~/components/ui/card";
-import {
-  ArrowUpIcon,
-  Camera,
-  Copy,
-  Download,
-  Eye,
-  EyeOff,
-  Send,
-  RefreshCcw,
-} from "lucide-react";
+import { ArrowUpIcon, Camera, Download, Eye, EyeOff, Send } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { copyToClipboard, shortStellarAddress } from "~/lib/utils";
-import { NetworkSelector } from "~/app/wallet/_components/network-selector";
+import { useParams, useSearchParams } from "next/navigation";
+import WalletLayoutWrapper from "~/app/wallet/[address]/send/_components/wallet-layout";
+import TelegramAuth from "~/app/wallet/_components/telegram-auth";
+import { useTelegramUser } from "~/hooks/useTelegramUser";
 
 const WalletLayout: FC<{ children?: ReactNode }> = ({ children }) => {
   const { address } = useParams();
+  const searchParams = useSearchParams();
+  const { logout } = useTelegramUser();
 
   const [isBalanceHidden, setIsBalanceHidden] = useState(false);
   const [showQR, setShowQR] = useState(false);
@@ -35,6 +29,7 @@ const WalletLayout: FC<{ children?: ReactNode }> = ({ children }) => {
   const balance = { data: "250.00" };
 
   const onLogout = () => {
+    logout();
     clickFeedback();
     alert("Logout clicked!");
   };
@@ -68,119 +63,121 @@ const WalletLayout: FC<{ children?: ReactNode }> = ({ children }) => {
     }
   };
   return (
-    <>
+    <TelegramAuth>
       <CardHeader className="flex flex-row items-center justify-between space-y-1">
         <Button
-          onClick={onLogout}
+          onClick={() => {
+            clickFeedback("soft");
+            clickFeedback("soft");
+            onLogout();
+          }}
           variant="ghost"
           aria-label="Scan QR Code"
           className="font-semibold text-zinc-500 hover:text-zinc-700"
         >
           Logout
         </Button>
-
-        <Button
-          onClick={() => scan()}
-          variant="ghost"
-          size="icon"
-          aria-label="Scan QR Code"
-          className="border-[1px] border-zinc-300 text-zinc-500 hover:text-zinc-700"
-        >
-          <Camera className="h-4 w-4" />
-        </Button>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <NetworkSelector />
-
-        <div className="rounded-lg bg-zinc-50 p-6 text-center">
-          <h2 className="mb-2 flex items-center justify-center text-sm font-medium text-zinc-500">
-            Current Balance
-            {/* Visibility Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleBalanceVisibility}
-              className="text-zinc-500 hover:text-zinc-700"
-            >
-              {isBalanceHidden ? (
-                <Eye className="h-4 w-4" />
-              ) : (
-                <EyeOff className="h-4 w-4" />
-              )}
-              <span className="sr-only">
-                {isBalanceHidden ? "Show balance" : "Hide balance"}
-              </span>
-            </Button>
-          </h2>
-
-          <div className="flex justify-center">
-            {/* Centered Amount */}
-            <div className="flex items-baseline">
-              <p className="text-4xl font-bold text-zinc-900">
-                {isBalanceHidden ? "•••••" : (balance.data ?? "-")}
-              </p>
-              <span className="ml-2 font-mono text-xl text-zinc-500">USDc</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Link
-            className="w-full"
-            href={`/wallet/${String(address)}/${showSendMoneyForm ? "" : "send"}`}
-          >
-            <Button
-              className="w-full bg-zinc-800 py-6 text-lg text-white transition-colors duration-300 hover:bg-zinc-900"
-              size="lg"
-              onClick={() => {
-                setShowQR(false);
-                setShowSendMoneyForm(!showSendMoneyForm);
-              }}
-            >
-              {!showSendMoneyForm ? (
-                <Send className="mr-2 h-5 w-5" />
-              ) : (
-                <ArrowUpIcon className="mr-2 h-5 w-5" />
-              )}
-              {showSendMoneyForm ? "Hide" : "Send"}
-            </Button>
-          </Link>
-          <Link
-            className="w-full"
-            href={`/wallet/${String(address)}/${showQR ? "" : "receive"}`}
-          >
-            <Button
-              className="w-full bg-zinc-800 py-6 text-lg text-white transition-colors duration-300 hover:bg-zinc-900"
-              size="lg"
-              onClick={() => {
-                setShowSendMoneyForm(false);
-                setShowQR(!showQR);
-              }}
-            >
-              {!showQR ? (
-                <Download className="mr-2 h-5 w-5" />
-              ) : (
-                <ArrowUpIcon className="mr-2 h-5 w-5" />
-              )}
-              {showQR ? "Hide QR" : "Receive"}
-            </Button>
-          </Link>
-        </div>
-
-        <p className="flex items-center justify-center text-center text-xs text-zinc-500">
-          Last updated: 2 minutes ago
+        <WalletLayoutWrapper>
           <Button
+            onClick={() => {
+              clickFeedback("soft");
+              scan();
+            }}
             variant="ghost"
             size="icon"
-            onClick={toggleBalanceVisibility}
-            className="text-zinc-500 hover:text-zinc-700"
+            aria-label="Scan QR Code"
+            className="border-[1px] border-zinc-300 text-zinc-500 hover:text-zinc-700"
           >
-            <RefreshCcw className="h-2 w-2" />
+            <Camera className="h-4 w-4" />
           </Button>
-        </p>
+        </WalletLayoutWrapper>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/*<NetworkSelector />*/}
+
+        <WalletLayoutWrapper>
+          <div className="rounded-lg bg-zinc-50 p-6 text-center">
+            <h2 className="mb-2 flex items-center justify-center text-sm font-medium text-zinc-500">
+              Current Balance
+              {/* Visibility Toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleBalanceVisibility}
+                className="text-zinc-500 hover:text-zinc-700"
+              >
+                {isBalanceHidden ? (
+                  <Eye className="h-4 w-4" />
+                ) : (
+                  <EyeOff className="h-4 w-4" />
+                )}
+                <span className="sr-only">
+                  {isBalanceHidden ? "Show balance" : "Hide balance"}
+                </span>
+              </Button>
+            </h2>
+            <div className="flex justify-center">
+              {/* Centered Amount */}
+              <div className="flex items-baseline">
+                <p className="text-4xl font-bold text-zinc-900">
+                  {isBalanceHidden ? "•••••" : (balance.data ?? "-")}
+                </p>
+                <span className="ml-2 font-mono text-xl text-zinc-500">
+                  USDc
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Link
+              className="w-full"
+              href={`/wallet/${String(address)}/${showSendMoneyForm ? "" : "send"}`}
+            >
+              <Button
+                className="w-full bg-zinc-800 py-6 text-lg text-white transition-colors duration-300 hover:bg-zinc-900"
+                size="lg"
+                onClick={() => {
+                  clickFeedback("soft");
+                  setShowQR(false);
+                  setShowSendMoneyForm(!showSendMoneyForm);
+                }}
+              >
+                {!showSendMoneyForm ? (
+                  <Send className="mr-2 h-5 w-5" />
+                ) : (
+                  <ArrowUpIcon className="mr-2 h-5 w-5" />
+                )}
+                {showSendMoneyForm ? "Hide" : "Send"}
+              </Button>
+            </Link>
+            <Link
+              className="w-full"
+              href={`/wallet/${String(address)}/${showQR ? "" : "receive"}`}
+            >
+              <Button
+                className="w-full bg-zinc-800 py-6 text-lg text-white transition-colors duration-300 hover:bg-zinc-900"
+                size="lg"
+                onClick={() => {
+                  clickFeedback("soft");
+                  setShowSendMoneyForm(false);
+                  setShowQR(!showQR);
+                }}
+              >
+                {!showQR ? (
+                  <Download className="mr-2 h-5 w-5" />
+                ) : (
+                  <ArrowUpIcon className="mr-2 h-5 w-5" />
+                )}
+                {showQR ? "Hide QR" : "Receive"}
+              </Button>
+            </Link>
+          </div>
+        </WalletLayoutWrapper>
+
         {children}
       </CardContent>
-    </>
+    </TelegramAuth>
   );
 };
 

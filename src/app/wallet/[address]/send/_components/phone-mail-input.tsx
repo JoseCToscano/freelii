@@ -21,22 +21,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { ChevronsUpDown } from "lucide-react";
-import { cn } from "~/lib/utils";
+import { Camera, ChevronsUpDown } from "lucide-react";
+import { cn, countryCodes, formatPhoneNumber } from "~/lib/utils";
+import { useQRScanner } from "~/hooks/useQRScanner";
 
-interface Props {
-  isLoading?: boolean;
-  phoneNumber: string;
-  setPhoneNumber: (phoneNumber: string) => void;
-}
-
-const VerificationForm: FC<Props> = ({
-  isLoading,
-  phoneNumber,
-  setPhoneNumber,
-}) => {
+const VerificationForm: FC = () => {
   const { clickFeedback } = useHapticFeedback();
+  const { scan } = useQRScanner();
 
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [verificationMethod, setVerificationMethod] = useState("phone");
   const [open, setOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState(countryCodes[0]);
@@ -57,38 +50,48 @@ const VerificationForm: FC<Props> = ({
   };
 
   return (
-    <div className="mx-auto w-full max-w-md">
-      <Tabs
-        value={verificationMethod}
-        onValueChange={setVerificationMethod}
-        className="w-full"
-      >
+    <Tabs
+      value={verificationMethod}
+      onValueChange={setVerificationMethod}
+      className="w-full"
+    >
+      <div className="flex gap-1">
         <TabsList className="mb-6 grid w-full grid-cols-2">
           <TabsTrigger value="phone">Phone Number</TabsTrigger>
           <TabsTrigger value="email">Email</TabsTrigger>
         </TabsList>
-        <TabsContent value="phone" className="space-y-4">
-          <div className="space-y-2">
-            <Label>Country</Label>
+        <Button
+          onClick={() => {
+            clickFeedback();
+            scan();
+          }}
+          type="button"
+          variant="outline"
+          size="icon"
+          className="border-2 border-zinc-300 hover:bg-zinc-100"
+        >
+          <Camera className="h-4 w-4" />
+          <span className="sr-only">Scan QR Code</span>
+        </Button>
+      </div>
+      <TabsContent value="phone" className="space-y-4">
+        <div className="space-y-2"></div>
+        <div className="space-y-2">
+          <Label>Phone Number</Label>
+          <div className="flex items-center space-x-2">
             <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   role="combobox"
                   aria-expanded={open}
-                  className="w-full justify-between"
+                  className="justify-between"
                 >
-                  {selectedCountry
-                    ? `${selectedCountry.label} (+${selectedCountry.code})`
-                    : "Select country..."}
+                  {selectedCountry ? `(+${selectedCountry.code})` : "( )"}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent
-                className="w-full p-0"
-                side="bottom"
-                align="start"
-              >
+              <PopoverContent side="bottom" align="start">
                 <Command>
                   <CommandInput placeholder="Search country..." />
                   <CommandList>
@@ -115,9 +118,6 @@ const VerificationForm: FC<Props> = ({
                 </Command>
               </PopoverContent>
             </Popover>
-          </div>
-          <div className="space-y-2">
-            <Label>Phone Number</Label>
             <Input
               type="tel"
               placeholder="XXX XXX XXXX"
@@ -127,41 +127,22 @@ const VerificationForm: FC<Props> = ({
               ref={phoneInputRef}
               maxLength={12}
             />
-            <p className="text-sm text-muted-foreground">
-              Enter your phone number without the country code
-            </p>
           </div>
-        </TabsContent>
-        <TabsContent value="email" className="space-y-4">
-          <div className="space-y-2">
-            <Label>Email Address</Label>
-            <Input type="email" placeholder="name@example.com" />
-            <p className="text-sm text-muted-foreground">
-              Enter your email address for verification
-            </p>
-          </div>
-        </TabsContent>
-      </Tabs>
-      <CardFooter className="mt-4 flex flex-col gap-4 p-0">
-        <Button
-          type="submit"
-          onClick={() => clickFeedback()}
-          className="w-full"
-        >
-          {isLoading ? (
-            <>
-              <span className="mr-2 animate-spin">⏳</span>
-              Sending OTP...
-            </>
-          ) : (
-            <>
-              <p className="text-light text-xs">Send Verification Code</p>
-              <ExpandingArrow className="-ml-2 h-3.5 w-3.5" />
-            </>
-          )}
-        </Button>
-      </CardFooter>
-    </div>
+          <p className="-translate-y-1 translate-x-1 text-start text-xs text-zinc-500">
+            Enter your phone number with country code
+          </p>
+        </div>
+      </TabsContent>
+      <TabsContent value="email" className="space-y-4">
+        <div className="space-y-2">
+          <Label>Email Address</Label>
+          <Input type="email" placeholder="name@example.com" />
+          <p className="text-sm text-muted-foreground">
+            Enter your email address for verification
+          </p>
+        </div>
+      </TabsContent>
+    </Tabs>
   );
 };
 

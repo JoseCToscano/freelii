@@ -39,7 +39,7 @@ export default function ReceiveMoney() {
             style={{ aspectRatio: "200/200", objectFit: "cover" }}
           />
         </div>
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <Label
             htmlFor="address"
             className="text-sm font-medium text-zinc-700"
@@ -70,7 +70,7 @@ export default function ReceiveMoney() {
               <span className="sr-only">Copy address</span>
             </Button>
           </div>
-        </div>
+        </div>*/}
       </div>
 
       <Button
