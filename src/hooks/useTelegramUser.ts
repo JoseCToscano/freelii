@@ -5,13 +5,13 @@ export const useTelegramUser = () => {
   const [user, setUser] = useState<WebAppUser | null>(null);
 
   useEffect(() => {
-    if (window.Telegram?.WebApp) {
+    if (window?.Telegram?.WebApp) {
       const userData = window.Telegram.WebApp.initDataUnsafe?.user;
       if (userData) {
         setUser(userData);
       }
     }
-  }, [window.Telegram]);
+  }, [window?.Telegram]);
 
   const logout = () => {
     setUser(null);
