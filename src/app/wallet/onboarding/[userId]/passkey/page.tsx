@@ -15,9 +15,20 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { usePasskey } from "~/hooks/usePasskey";
+import toast from "react-hot-toast";
 
 export default function CreateAccount() {
+  const { create } = usePasskey("passkey");
+
   const handleCreatePasskey = () => {
+    create()
+      .then((res) => {
+        toast.success(`passkey created: ${res}`);
+      })
+      .catch((err) => {
+        toast.error((err as Error)?.message ?? "An error occurred");
+      });
     // Implement passkey creation logic here
     console.log("Creating passkey...");
   };

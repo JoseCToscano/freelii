@@ -27,6 +27,7 @@ export const env = createEnv({
     MERCURY_JWT: z.string(),
     SRT_ASSET_ID: z.string(),
     ENABLE_SMS: z.string(),
+    SALT_ROUNDS: z.string(),
   },
 
   /**
@@ -72,6 +73,7 @@ export const env = createEnv({
     SRT_ASSET_ID: process.env.SRT_ASSET_ID,
     ENABLE_SMS: process.env.ENABLE_SMS,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    SALT_ROUNDS: process.env.SALT_ROUNDS,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

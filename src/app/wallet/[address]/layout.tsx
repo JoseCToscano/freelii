@@ -1,20 +1,17 @@
 "use client";
 import { Button } from "~/components/ui/button";
-import { type FC, ReactNode, useState } from "react";
+import { type FC, type ReactNode, useState } from "react";
 import { useHapticFeedback } from "~/hooks/useHapticFeedback";
 import { useQRScanner } from "~/hooks/useQRScanner";
 import { CardContent, CardHeader } from "~/components/ui/card";
 import { ArrowUpIcon, Camera, Download, Eye, EyeOff, Send } from "lucide-react";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import WalletLayoutWrapper from "~/app/wallet/[address]/send/_components/wallet-layout";
 import TelegramAuth from "~/app/wallet/_components/telegram-auth";
-import { useTelegramUser } from "~/hooks/useTelegramUser";
 
 const WalletLayout: FC<{ children?: ReactNode }> = ({ children }) => {
   const { address } = useParams();
-  const searchParams = useSearchParams();
-  const { logout } = useTelegramUser();
 
   const [isBalanceHidden, setIsBalanceHidden] = useState(false);
   const [showQR, setShowQR] = useState(false);
@@ -29,39 +26,10 @@ const WalletLayout: FC<{ children?: ReactNode }> = ({ children }) => {
   const balance = { data: "250.00" };
 
   const onLogout = () => {
-    logout();
     clickFeedback();
     alert("Logout clicked!");
   };
 
-  const handlePasskeyDetection = async () => {
-    try {
-      // Simulate a random challenge from your server
-      const challenge = new Uint8Array(32);
-      window.crypto.getRandomValues(challenge);
-
-      const options: PublicKeyCredentialRequestOptions = {
-        challenge,
-        rpId: window.location.hostname, // Use the current domain
-        timeout: 60000, // 1 minute timeout
-        userVerification: "preferred", // 'required', 'preferred', or 'discouraged'
-      };
-
-      const credential = await navigator.credentials.get({
-        publicKey: options,
-      });
-
-      if (credential) {
-        console.log("Passkey found:", credential);
-        alert("Passkey is available and was selected!");
-      } else {
-        alert("No passkeys available.");
-      }
-    } catch (error) {
-      console.error("Error detecting passkeys:", error);
-      alert("An error occurred or no passkeys were found.");
-    }
-  };
   return (
     <TelegramAuth>
       <CardHeader className="flex flex-row items-center justify-between space-y-1">

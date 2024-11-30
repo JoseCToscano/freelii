@@ -1,8 +1,8 @@
 "use client";
 import { type FC, type ReactNode, useState } from "react";
 import { useHapticFeedback } from "~/hooks/useHapticFeedback";
-import { useTelegramUser } from "~/hooks/useTelegramUser";
 import PinEntry from "~/app/wallet/_components/pin";
+import useTelegramWebView from "~/hooks/useTelegramWebView";
 
 interface TelegramAuthProps {
   children: ReactNode;
@@ -10,7 +10,7 @@ interface TelegramAuthProps {
 
 const TelegramAuth: FC<TelegramAuthProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const { user } = useTelegramUser();
+  const { user } = useTelegramWebView();
 
   const { clickFeedback } = useHapticFeedback();
 

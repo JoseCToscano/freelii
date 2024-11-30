@@ -4,6 +4,7 @@ import {
   type PrismaClient,
   type TransferStatus,
 } from "@prisma/client";
+import { BaseService } from "~/server/services/BaseService";
 
 interface INewTransfer {
   amount: number;
@@ -71,13 +72,7 @@ type IBankDetails =
   | IBankDetailsEU
   | IBankDetailsCanada;
 
-export class TransferService {
-  private readonly db: PrismaClient;
-
-  constructor(db: PrismaClient) {
-    this.db = db;
-  }
-
+export class TransferService extends BaseService {
   async getTransfer(id: string) {
     return this.db.transfer.findUnique({
       where: {

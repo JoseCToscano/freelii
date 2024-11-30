@@ -11,7 +11,7 @@ import {
   Horizon,
   nativeToScVal,
   Address,
-  SorobanRpc,
+  rpc as SorobanRpc,
   Contract,
   TransactionBuilder,
   Networks,
