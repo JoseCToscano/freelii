@@ -18,7 +18,7 @@ const WalletLayoutWrapper: FC<WalletLayoutWrapperProps> = ({ children }) => {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex-1 overflow-y-auto bg-gray-100">{children}</div>
+      <div className="flex-1 overflow-y-auto">{children}</div>
     </div>
   );
 };

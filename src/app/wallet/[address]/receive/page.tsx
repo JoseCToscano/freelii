@@ -1,22 +1,38 @@
 "use client";
+import { useState } from "react";
+import { QrCode, Share2, Copy, ArrowLeft, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Share2, Copy } from "lucide-react";
-import { copyToClipboard, generateQrCode } from "~/lib/utils";
-import Image from "next/image";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useParams } from "next/navigation";
+import { copyToClipboard } from "~/lib/utils";
+import { env } from "~/env";
+import Link from "next/link";
+import { useHapticFeedback } from "~/hooks/useHapticFeedback";
 
-export default function ReceiveMoney() {
+export default function ReceiveTransfers() {
   const { address } = useParams();
+  const { clickFeedback } = useHapticFeedback();
+  const [activeTab, setActiveTab] = useState<"receive" | "create">("receive");
+  const [amount, setAmount] = useState("");
+  const [description, setDescription] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
 
   const handleShare = () => {
     if (navigator.share) {
       navigator
         .share({
           title: "My Wallet Address",
-          text: `Here's my wallet address: ${String(address) ?? ""}`,
-          url: `https://example.com/send?address=${String(address)}`, // Todo
+          text: `Here's my wallet address: ${String(address)}`,
+          url: `${env.NEXT_PUBLIC_APP_URL}/send?address=${String(address)}`,
         })
         .then(() => console.log("Successful share"))
         .catch((error) => console.log("Error sharing", error));
@@ -25,77 +41,137 @@ export default function ReceiveMoney() {
     }
   };
 
+  const handleCopy = () => {
+    copyToClipboard(String(address));
+  };
+
+  const handleCreateQR = () => {
+    // Implement QR code creation with amount and description
+    console.log("Creating QR code with:", { amount, description });
+    setShowPreview(true);
+  };
+
+  const handleClosePreview = () => {
+    setShowPreview(false);
+    setAmount("");
+    setDescription("");
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <div className="flex items-center justify-center rounded-lg bg-zinc-50 p-4">
-          {/* Replace this with an actual QR code component */}
-          <Image
-            src={generateQrCode(`/sign?to=${String(address)}`)}
-            width="250"
-            height="250"
-            alt="QR Code"
-            className="rounded-md"
-            style={{ aspectRatio: "200/200", objectFit: "cover" }}
-          />
-        </div>
-        {/* <div className="space-y-2">
-          <Label
-            htmlFor="address"
-            className="text-sm font-medium text-zinc-700"
-          >
-            Your Wallet Address
-          </Label>
-          <div className="flex space-x-2">
-            <div className="flex w-full flex-col items-start justify-start">
-              <Input
-                id="address"
-                type="text"
-                value={String(address)}
-                readOnly
-                className="border-zinc-300 text-sm focus:border-zinc-500 focus:ring-zinc-500"
-              />
-              <span className="ml-2 text-xs text-muted-foreground">
-                Wallet addresses always follow this format
-              </span>
+    <div>
+      <Card className="mx-auto max-w-md">
+        <CardHeader>
+          <CardTitle className="text-start text-2xl font-bold">
+            <Link href={`/wallet/${String(address)}`}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  clickFeedback();
+                }}
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+            Receive Transfers
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {showPreview ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Payment QR Preview</h3>
+                <Button variant="ghost" size="sm" onClick={handleClosePreview}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex items-center justify-center rounded-lg bg-white p-4 shadow-inner">
+                <QrCode className="h-48 w-48 text-gray-800" />
+              </div>
+              <div className="space-y-2 text-center">
+                <p className="font-semibold">Amount: {amount} USDc</p>
+                {description && (
+                  <p className="text-sm text-gray-600">
+                    Description: {description}
+                  </p>
+                )}
+              </div>
+              <Button onClick={handleShare} className="w-full">
+                <Share2 className="mr-2 h-4 w-4" />
+                Share Payment QR
+              </Button>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="border-zinc-300 hover:bg-zinc-100"
-              onClick={() => copyToClipboard(String(address))}
+          ) : (
+            <Tabs
+              value={activeTab}
+              onValueChange={(value) =>
+                setActiveTab(value as "receive" | "create")
+              }
             >
-              <Copy className="h-4 w-4" />
-              <span className="sr-only">Copy address</span>
-            </Button>
-          </div>
-        </div>*/}
-      </div>
-
-      <Button
-        className="w-full bg-zinc-800 py-6 text-lg text-white transition-colors duration-300 hover:bg-zinc-900"
-        size="lg"
-        onClick={handleShare}
-      >
-        <Share2 className="mr-2 h-5 w-5" />
-        Share Address
-      </Button>
-
-      <div className="space-y-3 rounded-lg bg-zinc-50 p-4">
-        <h2 className="text-sm font-semibold text-zinc-700">
-          How to Receive Money
-        </h2>
-        <ol className="list-inside list-decimal space-y-2 text-sm text-zinc-600">
-          <li>Share your QR code or wallet address with the sender</li>
-          <li>The sender scans the QR code or enters your address</li>
-          <li>Once sent, the funds will appear in your wallet</li>
-        </ol>
-      </div>
-
-      <p className="text-center text-xs text-zinc-500">
-        Always verify the sender before sharing your wallet address.
-      </p>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="receive">Receive Money</TabsTrigger>
+                <TabsTrigger value="create">Create Payment QR</TabsTrigger>
+              </TabsList>
+              <TabsContent value="receive" className="space-y-4">
+                <div className="flex items-center justify-center rounded-lg bg-white p-4 shadow-inner">
+                  <QrCode className="h-48 w-48 text-gray-800" />
+                </div>
+                <div className="flex space-x-2">
+                  <Button onClick={handleShare} className="flex-1">
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share
+                  </Button>
+                  <Button
+                    onClick={handleCopy}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <Copy className="mr-2 h-4 w-4" />
+                    Copy
+                  </Button>
+                </div>
+                <div className="text-sm text-gray-600">
+                  <p>To receive money:</p>
+                  <ol className="mt-2 list-inside list-decimal space-y-1">
+                    <li>Share this QR code with the sender</li>
+                    <li>Ask them to scan it with their Freelii app</li>
+                    <li>Confirm the transfer once it&#39;s initiated</li>
+                  </ol>
+                </div>
+              </TabsContent>
+              <TabsContent value="create" className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Amount (USDc)</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    placeholder="Enter amount"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description (optional)</Label>
+                  <Input
+                    id="description"
+                    placeholder="Enter description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </div>
+                <Button onClick={handleCreateQR} className="w-full">
+                  Create Payment QR
+                </Button>
+              </TabsContent>
+            </Tabs>
+          )}
+        </CardContent>
+        <CardFooter>
+          <p className="w-full text-center text-xs text-gray-500">
+            Secure transfers powered by Freelii
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

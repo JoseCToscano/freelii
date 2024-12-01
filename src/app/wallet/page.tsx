@@ -30,15 +30,14 @@ export default function WalletLogin() {
 
   useEffect(() => {
     if (user && query.status === "success") {
+      window.Telegram?.WebApp?.expand();
       // NEW USER
       if (!query.data) {
-        toast.error("User not found");
         return router.push("/wallet/onboarding");
       }
 
       // EXISTING USER, NOT FULLY ONBOARDED
       if (query.data?.hashedPin) {
-        toast.success("Welcome back!");
         return router.push(`/wallet/${query.data.id}`);
       }
 

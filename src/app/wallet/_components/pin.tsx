@@ -49,6 +49,7 @@ const PinEntry: FC<PinEntryProps> = ({
         })
         .catch(() => {
           setShake(true);
+          clickFeedback("error");
           setPin("");
         })
         .finally(() => setLoading(false));

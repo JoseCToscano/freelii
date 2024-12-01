@@ -1,6 +1,6 @@
 "use client";
 
-import { type FC, useState, useRef } from "react";
+import { type FC, useState, useRef, useEffect } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -23,19 +23,37 @@ import { Camera, ChevronsUpDown } from "lucide-react";
 import { cn, countryCodes, formatPhoneNumber } from "~/lib/utils";
 import { useQRScanner } from "~/hooks/useQRScanner";
 
-const VerificationForm: FC = () => {
+interface VerificationFormProps {
+  setRecipient: (recipient: string) => void;
+}
+
+const VerificationForm: FC<VerificationFormProps> = ({ setRecipient }) => {
   const { clickFeedback } = useHapticFeedback();
   const { scan } = useQRScanner();
 
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [verificationMethod, setVerificationMethod] = useState("phone");
   const [open, setOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState(countryCodes[0]);
   const phoneInputRef = useRef<HTMLInputElement | null>(null);
 
+  useEffect(() => {
+    let recipientText = "";
+    if (verificationMethod === "phone") {
+      recipientText = "Phone Number:";
+      const fullPhoneNumber = `${selectedCountry ? `(+${selectedCountry.code})` : "( )"} ${phoneNumber}`;
+      setRecipient(recipientText + " " + fullPhoneNumber);
+    } else {
+      recipientText = "Email Address";
+      setRecipient(recipientText + " " + email);
+    }
+  }, [verificationMethod, phoneNumber, email]);
+
   const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const formattedPhoneNumber = formatPhoneNumber(event.target.value);
     setPhoneNumber(formattedPhoneNumber);
+    setRecipient(formattedPhoneNumber);
   };
 
   const handlePhoneKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -140,7 +158,13 @@ const VerificationForm: FC = () => {
       <TabsContent value="email" className="space-y-4">
         <div className="space-y-2">
           <Label>Email Address</Label>
-          <Input type="email" placeholder="name@example.com" />
+          {email}
+          <Input
+            id="email"
+            type="email"
+            placeholder="name@example.com"
+            onChange={(e) => setEmail(e.target.value)}
+          />
           <p className="text-sm text-muted-foreground">
             Enter your email address for verification
           </p>

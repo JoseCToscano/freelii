@@ -8,12 +8,14 @@ import { useHapticFeedback } from "~/hooks/useHapticFeedback";
 
 interface Props {
   handleGoBack: () => void;
+  amount: number | string;
+  recipient: string;
 }
-const PreviewTransfer: FC<Props> = ({ handleGoBack }) => {
+const PreviewTransfer: FC<Props> = ({ handleGoBack, amount, recipient }) => {
   const { clickFeedback } = useHapticFeedback();
 
   return (
-    <div>
+    <div className="space-y-6 rounded-md bg-white">
       <CardHeader className="space-y-2">
         <div className="flex items-center gap-2">
           <Button
@@ -33,12 +35,18 @@ const PreviewTransfer: FC<Props> = ({ handleGoBack }) => {
         <div className="space-y-4 rounded-lg bg-gray-100 p-6">
           <div className="space-y-1">
             <p className="text-sm text-gray-500">Sending to</p>
-            <p className="font-medium">+93 XXX XXX XXXX</p>
+            <p className="font-medium">{recipient}</p>
           </div>
           <div className="space-y-1">
             <p className="text-sm text-gray-500">Amount</p>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold">250.00</span>
+              <span className="text-3xl font-bold">
+                $
+                {Number(amount).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </span>
               <span className="text-gray-500">USDc</span>
             </div>
           </div>
@@ -51,7 +59,14 @@ const PreviewTransfer: FC<Props> = ({ handleGoBack }) => {
           </div>
           <div className="flex justify-between border-t py-2">
             <span className="text-gray-500">Total Amount</span>
-            <span className="font-medium">250.00 USDc</span>
+            <span className="font-medium">
+              $
+              {Number(amount).toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{" "}
+              USDc
+            </span>
           </div>
         </div>
       </CardContent>
