@@ -26,6 +26,9 @@ const useTelegramWebview = () => {
   const [themeParams, setThemeParams] = useState<WebAppThemeParams>();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [biometricType, setBiometricType] = useState<
+    "face" | "finger" | "unknown"
+  >("unknown");
 
   // UseEffect to dynamically load the Telegram script and then authenticate
   useEffect(() => {
@@ -54,6 +57,10 @@ const useTelegramWebview = () => {
       WebApp = window.Telegram?.WebApp;
       WebView = window.Telegram?.WebView;
       if (WebApp) {
+        if (WebApp.BiometricManager?.biometricType) {
+          setBiometricType(WebApp.BiometricManager.biometricType ?? "unknown");
+        }
+
         if (WebApp.initDataUnsafe.user) {
           console.log("user:", WebApp.initDataUnsafe.user);
           setUser(WebApp.initDataUnsafe.user);
@@ -151,6 +158,7 @@ const useTelegramWebview = () => {
     isExpanded,
     closeWebApp,
     expandWebApp,
+    biometricType,
   };
 };
 

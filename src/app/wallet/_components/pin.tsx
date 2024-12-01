@@ -1,11 +1,11 @@
 "use client";
 
 import { type FC, useEffect, useState } from "react";
-import { Fingerprint, Delete } from "lucide-react";
+import { Fingerprint, ScanFaceIcon, Delete } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { useHapticFeedback } from "~/hooks/useHapticFeedback";
-import toast from "react-hot-toast";
+import useTelegramWebView from "~/hooks/useTelegramWebView";
 
 interface PinEntryProps {
   requestInitialBiometricAuth: () => void;
@@ -20,10 +20,10 @@ const PinEntry: FC<PinEntryProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [pin, setPin] = useState<string>("");
   const { clickFeedback } = useHapticFeedback();
+  const { biometricType } = useTelegramWebView();
   const [shake, setShake] = useState<boolean>(false);
 
   useEffect(() => {
-    console.log("PinEntry component mounted, requesting auth");
     requestInitialBiometricAuth();
   }, []);
 
@@ -48,15 +48,16 @@ const PinEntry: FC<PinEntryProps> = ({
           }
         })
         .catch(() => {
-          toast.error("We're experiencing some issues, please try again later");
-        });
-      setLoading(false);
+          setShake(true);
+          setPin("");
+        })
+        .finally(() => setLoading(false));
     }
   }, [pin]);
 
   const handleNumberClick = (number: number) => {
     if (pin.length < 6) {
-      clickFeedback("soft");
+      clickFeedback("medium");
       setPin((prev) => prev + number);
     } else {
       setShake(true);
@@ -117,11 +118,17 @@ const PinEntry: FC<PinEntryProps> = ({
             </Button>
           ))}
           <Button
+            disabled={biometricType === "unknown"}
             variant="outline"
             onClick={handleBiometric}
             className="flex h-14 items-center justify-center"
           >
-            <Fingerprint className="h-6 w-6 text-blue-500" />
+            {biometricType === "finger" && (
+              <Fingerprint className="h-6 w-6 text-blue-500" />
+            )}
+            {biometricType === "face" && (
+              <ScanFaceIcon className="text-blue-500" />
+            )}
           </Button>
           <Button
             variant="outline"

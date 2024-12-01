@@ -6,12 +6,13 @@ import { useQRScanner } from "~/hooks/useQRScanner";
 import { CardContent, CardHeader } from "~/components/ui/card";
 import { ArrowUpIcon, Camera, Download, Eye, EyeOff, Send } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import WalletLayoutWrapper from "~/app/wallet/[address]/send/_components/wallet-layout";
 import TelegramAuth from "~/app/wallet/_components/telegram-auth";
 
 const WalletLayout: FC<{ children?: ReactNode }> = ({ children }) => {
   const { address } = useParams();
+  const router = useRouter();
 
   const [isBalanceHidden, setIsBalanceHidden] = useState(false);
   const [showQR, setShowQR] = useState(false);
@@ -27,7 +28,7 @@ const WalletLayout: FC<{ children?: ReactNode }> = ({ children }) => {
 
   const onLogout = () => {
     clickFeedback();
-    alert("Logout clicked!");
+    router.push("/wallet");
   };
 
   return (

@@ -1,5 +1,6 @@
 "use client";
 
+import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { Shield, Key, ExternalLink } from "lucide-react";
 import { Button } from "~/components/ui/button";
@@ -17,12 +18,14 @@ import { ClientTRPCErrorHandler, cn } from "~/lib/utils";
 import useTelegramWebView from "~/hooks/useTelegramWebView";
 import Link from "next/link";
 import { api } from "~/trpc/react";
+import { useParams } from "next/navigation";
 
 type Step = "create-pin" | "confirm-pin" | "passkey";
 
 export default function OnboardingMobile() {
+  const { userId } = useParams();
   const { clickFeedback } = useHapticFeedback();
-  const { isExpanded, user: telegramUser } = useTelegramWebView();
+  const { isExpanded } = useTelegramWebView();
 
   const [loading, setLoading] = useState<boolean>(false);
   const [pin, setPin] = useState("");
@@ -34,14 +37,6 @@ export default function OnboardingMobile() {
   const persistPin = api.users.setPin.useMutation({
     onError: ClientTRPCErrorHandler,
   });
-  const { data: user } = api.users.getUserByTelegramId.useQuery(
-    {
-      telegramId: String(telegramUser?.id),
-    },
-    {
-      enabled: !!telegramUser,
-    },
-  );
 
   useEffect(() => {
     if (shake) {
@@ -60,19 +55,24 @@ export default function OnboardingMobile() {
   }, [pin]);
 
   useEffect(() => {
-    if (!user) {
-      throw new Error("User not found");
+    if (!userId || typeof userId !== "string") {
+      throw new Error("User ID is required");
     }
+
     if (step === "confirm-pin") {
       if (confirmPin.length === 6) {
         if (confirmPin === pin) {
           setLoading(true);
           persistPin
             .mutateAsync({
-              userId: user?.id,
+              userId: String(userId),
               pin: confirmPin,
             })
-            .then(() => {
+            .then(({ success }) => {
+              if (!success) {
+                throw new Error("Failed to set PIN");
+              }
+              toast.success(`PIN set successfully`);
               clickFeedback("success");
               setStep("passkey");
               setLoading(false);
@@ -93,7 +93,7 @@ export default function OnboardingMobile() {
   const handlePinInput = (value: string) => {
     if (step === "create-pin") {
       if (pin.length < 6) {
-        clickFeedback("soft");
+        clickFeedback("medium");
         setPin((prev) => prev + value);
       } else {
         clickFeedback("warning");
@@ -103,7 +103,7 @@ export default function OnboardingMobile() {
 
     if (step === "confirm-pin") {
       if (confirmPin.length < 6) {
-        clickFeedback("soft");
+        clickFeedback("medium");
         setConfirmPin((prev) => prev + value);
       } else {
         clickFeedback("warning");
@@ -231,18 +231,17 @@ export default function OnboardingMobile() {
                 When you&#39;re ready, click the button below to continue
                 setting up your passkey.
               </p>
-              {user && (
-                <Link
-                  className="w-full"
-                  href={`/wallet/onboarding/${String(user?.id)}/passkey`}
-                  target="_blank"
-                >
-                  <Button className="w-full">
-                    <Key className="mr-2 h-5 w-5" />
-                    Set up Passkey in Secure Browser
-                  </Button>
-                </Link>
-              )}
+
+              <Link
+                className="w-full"
+                href={`/wallet/onboarding/${String(userId)}/passkey`}
+                target="_blank"
+              >
+                <Button className="w-full">
+                  <Key className="mr-2 h-5 w-5" />
+                  Set up Passkey in Secure Browser
+                </Button>
+              </Link>
             </div>
           )}
         </CardContent>

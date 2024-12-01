@@ -15,8 +15,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-100 p-4">
-      <Card className="w-full max-w-md border-0 bg-white shadow-lg">
+    <div className="flex min-h-screen flex-col items-center justify-start bg-zinc-100">
+      <Card className="m-0 h-[92vh] w-full max-w-md border-none bg-transparent">
         <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
       </Card>
       <span className="mt-4 text-xs text-zinc-500">

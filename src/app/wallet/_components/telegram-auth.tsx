@@ -3,6 +3,8 @@ import { type FC, type ReactNode, useState } from "react";
 import { useHapticFeedback } from "~/hooks/useHapticFeedback";
 import PinEntry from "~/app/wallet/_components/pin";
 import useTelegramWebView from "~/hooks/useTelegramWebView";
+import { api } from "~/trpc/react";
+import { ClientTRPCErrorHandler } from "~/lib/utils";
 
 interface TelegramAuthProps {
   children: ReactNode;
@@ -10,13 +12,26 @@ interface TelegramAuthProps {
 
 const TelegramAuth: FC<TelegramAuthProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const { user } = useTelegramWebView();
+  const { user: telegramUser } = useTelegramWebView();
 
   const { clickFeedback } = useHapticFeedback();
 
   const [isAuthenticating, setIsAuthenticating] = useState<boolean>(true); // Track if authentication is in progress
   const [authFailed, setAuthFailed] = useState<boolean>(false); // Track if authentication failed
   const [biometricAttempted, setBiometricAttempted] = useState<boolean>(false); // Track if biometrics were attempted
+
+  const authenticateWithPin = api.users.validatePin.useMutation({
+    onError: ClientTRPCErrorHandler,
+  });
+
+  const { data: user, status } = api.users.getUserByTelegramId.useQuery(
+    {
+      telegramId: String(telegramUser?.id),
+    },
+    {
+      enabled: !!telegramUser?.id,
+    },
+  );
 
   // Function to handle biometric authentication
   const authenticate = () => {
@@ -106,19 +121,23 @@ const TelegramAuth: FC<TelegramAuthProps> = ({ children }) => {
   };
 
   const requestPinAuth = async (pin: string): Promise<boolean> => {
-    // if(pin === user.pin)
-    if (pin === "123456") {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setIsAuthenticated(true);
-      return true;
-    } else {
-      setIsAuthenticated(false);
-      return false;
+    if (!user) {
+      throw new Error("User not found");
     }
+    const { success } = await authenticateWithPin.mutateAsync({
+      userId: user.id,
+      pin,
+    });
+    setIsAuthenticated(success);
+    return success;
   };
 
   if (user && isAuthenticated) {
     return <div>{children}</div>;
+  }
+
+  if (!user && status === "success") {
+    return <div>Unauthorized</div>;
   }
 
   return (
