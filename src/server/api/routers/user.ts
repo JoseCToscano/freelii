@@ -3,6 +3,16 @@ import { z } from "zod";
 import { AuthService } from "~/server/services/AuthService";
 
 export const userRouter = createTRPCRouter({
+  registerUser: publicProcedure
+    .input(z.object({ telegramId: z.string().or(z.number()) }))
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.db.user.create({
+        data: {
+          telegramId: String(input.telegramId),
+        },
+      });
+      return user;
+    }),
   getUserByTelegramId: publicProcedure
     .input(z.object({ telegramId: z.string().or(z.number()) }))
     .query(async ({ ctx, input }) => {

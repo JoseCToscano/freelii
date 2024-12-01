@@ -24,7 +24,7 @@ model User {
   assignedGAddress  String?
   passkeyCAddress   String?
   passkeyKey        String?
-  phone             String              @unique
+  phone             String?             @unique
   transfers         Transfer[]          @relation("UserTransfers")
   AuthSession       AuthSession[]
   OTPVerification   OTPVerification?

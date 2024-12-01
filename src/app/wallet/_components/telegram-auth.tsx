@@ -5,6 +5,7 @@ import PinEntry from "~/app/wallet/_components/pin";
 import useTelegramWebView from "~/hooks/useTelegramWebView";
 import { api } from "~/trpc/react";
 import { ClientTRPCErrorHandler } from "~/lib/utils";
+import Welcome from "~/app/wallet/_components/welcome";
 
 interface TelegramAuthProps {
   children: ReactNode;
@@ -137,7 +138,7 @@ const TelegramAuth: FC<TelegramAuthProps> = ({ children }) => {
   }
 
   if (!user && status === "success") {
-    return <div>Unauthorized</div>;
+    return <Welcome />;
   }
 
   return (

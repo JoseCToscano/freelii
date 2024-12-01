@@ -70,7 +70,6 @@ export default function SendMoneyForm() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {JSON.stringify(recipient)}
           <VerificationForm setRecipient={setRecipient} />
           <div className="space-y-2">
             <Label htmlFor="amount">Amount to send</Label>
