@@ -18,7 +18,8 @@ export async function GET(request: Request) {
       (
         <div
           style={{
-            backgroundColor: "black",
+            backgroundImage: "linear-gradient(135deg, #1c1c1c, #000, #2c2c2c)", // Add a gradient to create a metallic effect
+
             height: "100%",
             width: "100%",
             display: "flex",
