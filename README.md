@@ -64,5 +64,4 @@ We envision future iterations of Freelii incorporating Soroban smart contracts m
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
-![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)
-
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/JoseCToscano/freelii/blob/main/LICENSE)
