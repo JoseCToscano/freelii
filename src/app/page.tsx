@@ -60,14 +60,14 @@ export default function FreeliiLandingPage() {
         {/* Hero section */}
         <div className="relative overflow-hidden bg-white">
           <div className="mx-auto max-w-7xl">
-            <div className="relative z-10 flex items-center justify-between">
+            <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between px-4 sm:px-6 lg:px-8">
               {/* Left side content */}
-              <div className="w-1/2 pb-8 sm:pb-16 md:pb-20 lg:pb-28 xl:pb-32">
-                <main className="mx-auto mt-10 max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+              <div className="w-full lg:w-1/2 pb-8 sm:pb-16 md:pb-20 lg:pb-28 xl:pb-32">
+                <main className="mx-auto mt-10 max-w-7xl sm:mt-12 md:mt-16 lg:mt-20 xl:mt-28">
                   <span className="text-gray-500">
                     Secure, fast, and accessible worldwide.
                   </span>
-                  <div className="lg:text-left">
+                  <div className="text-center lg:text-left">
                     <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
                       <span className="block xl:inline bg-gradient-to-r from-black to-gray-600 bg-clip-text text-transparent">
                         Make money move
@@ -90,8 +90,8 @@ export default function FreeliiLandingPage() {
               </div>
 
               {/* Right side form */}
-              <div className="w-1/2 p-8">
-                <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8">
+              <div className="w-full lg:w-1/2 p-4 sm:p-8">
+                <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-6 sm:p-8">
                   <h2 className="text-2xl font-bold mb-6 text-[#4ab3e8]">Join Our Waitlist</h2>
                   <form className="space-y-4" onSubmit={handleSubmit}>
                     <div>
