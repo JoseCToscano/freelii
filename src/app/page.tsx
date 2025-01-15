@@ -130,7 +130,7 @@ export default function FreeliiLandingPage() {
                           <Check className="mr-2 h-5 w-5 animate-bounce" /> Success!
                         </span>
                       ) : (
-                        "Request EarlyAccess"
+                        "Request Early Access"
                       )}
                     </Button>
                   </form>
