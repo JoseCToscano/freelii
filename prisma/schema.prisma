@@ -158,6 +158,15 @@ model OTPVerification {
   Transfer Transfer[]
 }
 
+model Waitlist {
+  id        Int      @id @default(autoincrement())
+  contact   String
+  name      String
+  isEmail   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // Enum for transfer statuses
 enum TransferStatus {
   PENDING

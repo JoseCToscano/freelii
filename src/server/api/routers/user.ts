@@ -3,6 +3,22 @@ import { z } from "zod";
 import { AuthService } from "~/server/services/AuthService";
 
 export const userRouter = createTRPCRouter({
+  addToWaitlist: publicProcedure
+    .input(z.object({ contact: z.string(), name: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      let isEmail = false;
+      if (input.contact.includes("@")) {
+        isEmail = true;
+      }
+      const user = await ctx.db.waitlist.create({
+        data: {
+          contact: input.contact,
+          name: input.name,
+          isEmail,
+        },
+      });
+      return user;
+    }),
   registerUser: publicProcedure
     .input(z.object({ telegramId: z.string().or(z.number()) }))
     .mutation(async ({ ctx, input }) => {

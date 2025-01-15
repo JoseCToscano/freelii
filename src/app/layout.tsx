@@ -2,9 +2,15 @@ import "~/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
+import { Nunito } from 'next/font/google';
 
 import { TRPCReactProvider } from "~/trpc/react";
 import ToasterProvider from "~/providers/toaster-provider";
+
+const nunito = Nunito({
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: "Freelii",

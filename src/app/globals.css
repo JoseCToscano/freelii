@@ -1,0 +1,8 @@
+.dialog-overlay {
+  background-color: rgba(0, 0, 0, 0.3); /* Adjust opacity as needed */
+}
+
+/* Or if you want to remove it completely */
+[data-overlay-ref] {
+  background-color: transparent;
+} 
