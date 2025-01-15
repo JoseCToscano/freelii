@@ -1,6 +1,6 @@
 ![Feeelii Landing Preview](https://utfs.io/f/XoQ2oTl97RNoXUHz4kl97RNo1MiU54ZpKquvFkOjJHL6tdIf)
 
-# Freelii
+# Freelii :)
 Freelii is a modern platform designed to make secure cross-border payments and asset transfers effortless using the Stellar blockchain. It provides a smooth, intuitive experience for both on-chain and off-chain transactions, ideal for freelancers, remote workers, and anyone needing simple, efficient financial solutions.
 
 Our primary goal is to deliver cross-border payment rails for non-crypto users, eliminating as much industry jargon as possible—even common terms like OTP or KYC are minimized. We focused on creating an experience that feels as familiar and straightforward as sending a text message, allowing users to access financial tools without complexity or barriers.
