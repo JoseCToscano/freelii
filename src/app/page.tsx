@@ -6,7 +6,7 @@ import { api } from "~/trpc/react";
 import toast from "react-hot-toast";
 import { useState } from "react";
 import { Check } from "lucide-react";
-
+import { Globe } from "./components/globe";
 
 export default function FreeliiLandingPage() {
 
@@ -57,41 +57,33 @@ export default function FreeliiLandingPage() {
       </header>
 
       <main className="flex-grow">
-        {/* Hero section */}
-        <div className="relative overflow-hidden bg-white">
+        <div className="relative overflow-hidden bg-transparent">
           <div className="mx-auto max-w-7xl">
-            <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between px-4 sm:px-6 lg:px-8">
-              {/* Left side content */}
-              <div className="w-full lg:w-1/2 pb-8 sm:pb-16 md:pb-20 lg:pb-28 xl:pb-32">
-                <main className="mx-auto mt-10 max-w-7xl sm:mt-12 md:mt-16 lg:mt-20 xl:mt-28">
-                  <span className="text-gray-500">
-                    Secure, fast, and accessible worldwide.
-                  </span>
-                  <div className="text-center lg:text-left">
-                    <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
-                      <span className="block xl:inline bg-gradient-to-r from-black to-gray-600 bg-clip-text text-transparent">
-                        Make money move
-                      </span>{" "}
-                      <span>
-                        <Image
-                          src="/Freeli-text.png"
-                          alt="Freelii"
-                          width={200}
-                          height={60}
-                          className="inline-block"
-                        />
-                      </span>
-                    </h1>
-                    <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg md:mt-5 md:text-xl">
-                      Send and receive money anywhere, anytime. Collect cash from loved ones abroad.
-                    </p>
-                  </div>
-                </main>
-              </div>
-
-              {/* Right side form */}
-              <div className="w-full lg:w-1/2 p-4 sm:p-8">
-                <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-6 sm:p-8">
+            <div className="relative z-10 px-4 sm:px-6 lg:px-8">
+              {/* Top section with content and Globe */}
+              <div className="flex flex-col lg:flex-row items-center justify-between">
+                {/* Left side content */}
+                <div className="w-full lg:w-1/2 pb-8 sm:pb-16 md:pb-20 lg:pb-28 xl:pb-32">
+                  <main className="mx-auto mt-10 max-w-7xl sm:mt-12 md:mt-16 lg:mt-20 xl:mt-28">
+                    <div className="text-center lg:text-left">
+                      <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
+                        <span className="block xl:inline bg-gradient-to-r from-black to-gray-600 bg-clip-text text-transparent">
+                          Make money move
+                        </span>{" "}
+                        <span>
+                          <Image
+                            src="/Freeli-text.png"
+                            alt="Freelii"
+                            width={200}
+                            height={60}
+                            className="inline-block"
+                          />
+                        </span>
+                      </h1>
+                    </div>
+                  {/* Form section below */}
+              <div className="w-full max-w-md mx-auto mt-8 lg:mt-12">
+                <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8">
                   <h2 className="text-2xl font-bold mb-6 text-[#4ab3e8]">Join Our Waitlist</h2>
                   <form className="space-y-4" onSubmit={handleSubmit}>
                     <div>
@@ -102,7 +94,7 @@ export default function FreeliiLandingPage() {
                         placeholder="Full Name"
                         className="w-full"
                         required
-                      />
+                        />
                     </div>
                     <div>
                       <Input
@@ -112,17 +104,17 @@ export default function FreeliiLandingPage() {
                         placeholder="Email or Phone Number"
                         className="w-full"
                         required
-                      />
+                        />
                     </div>
                     <Button 
                       type="submit"
                       className={`w-full transition-all duration-200 ${
                         isSuccess 
-                          ? "bg-green-500 hover:bg-green-600" 
-                          : "bg-[#4ab3e8] hover:bg-blue-400"
+                        ? "bg-green-500 hover:bg-green-600" 
+                        : "bg-[#4ab3e8] hover:bg-blue-400"
                       } text-white`}
                       disabled={isLoading || isSuccess}
-                    >
+                      >
                       {isLoading ? (
                         "Loading..."
                       ) : isSuccess ? (
@@ -136,12 +128,22 @@ export default function FreeliiLandingPage() {
                   </form>
                 </div>
               </div>
+                      </main>
+                </div>
+                
+                {/* Globe stays on right */}
+                <div className="w-full lg:w-1/2">
+                  <Globe />
+                </div>
+              </div>
+
+              
             </div>
           </div>
         </div>
       </main>
 
-      <footer className="bg-white mt-auto">
+      <footer className="bg-transparent mt-auto">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
           
           <div className="mt-8 md:order-1 md:mt-0">

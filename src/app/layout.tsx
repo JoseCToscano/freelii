@@ -6,6 +6,7 @@ import { Nunito } from 'next/font/google';
 
 import { TRPCReactProvider } from "~/trpc/react";
 import ToasterProvider from "~/providers/toaster-provider";
+import Background from "./components/background";
 
 const nunito = Nunito({
   subsets: ['latin'],
@@ -26,7 +27,9 @@ export default function RootLayout({
       <body>
         <TRPCReactProvider>
           <ToasterProvider />
+          <Background >
           {children}
+          </Background>
         </TRPCReactProvider>
       </body>
     </html>
