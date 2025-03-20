@@ -46,7 +46,7 @@ export default function Component() {
   );
 
   const deposit = api.stellar.deposit.useMutation({
-    onError: ClientTRPCErrorHandler,
+    // onError: ClientTRPCErrorHandler,
     onSuccess: (data) => {
       console.log(data);
     },

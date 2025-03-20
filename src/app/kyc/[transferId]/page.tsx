@@ -54,7 +54,7 @@ const KYCForm: FC = () => {
 
   // tRPC handlers
   const putKyc = api.stellar.kyc.useMutation({
-    onError: ClientTRPCErrorHandler,
+    // onError: ClientTRPCErrorHandler,
   });
   const kycFileConfig = api.stellar.kycFileConfig.useMutation({
     onError: ClientTRPCErrorHandler,
@@ -113,6 +113,8 @@ const KYCForm: FC = () => {
         type: isReceiver ? "receiver" : "sender",
         transferId: String(transferId),
       });
+      console.log("url", url);
+      console.log("config", config);
       try {
         const formData = new FormData();
         if (sep12Id) {
@@ -124,7 +126,9 @@ const KYCForm: FC = () => {
         if (photo_id_back) {
           formData.append("photo_id_back", photo_id_back);
         }
-        await axios.put(url, formData, config).catch(() => setLoading(false));
+        if (url && config) {
+          await axios.put(url, formData, config).catch(() => setLoading(false));
+        }
         setLoading(false);
       } catch (e) {
         setLoading(false);

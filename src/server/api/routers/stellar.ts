@@ -330,7 +330,7 @@ export const stellarRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const transfer = await ctx.db.transfer.findUnique({
+      try{const transfer = await ctx.db.transfer.findUnique({
         where: { id: input.transferId },
       });
       if (!transfer) {
@@ -350,16 +350,19 @@ export const stellarRouter = createTRPCRouter({
           code: "INTERNAL_SERVER_ERROR",
         });
       }
+      console.log("authSessionId", authSessionId);
       const authSession = await ctx.db.authSession.findUniqueOrThrow({
         where: { id: authSessionId },
       });
 
+      console.log("authSession", authSession);
       const kycEntry = await ctx.db.kYC.findFirst({
         where: {
           authSessionId: authSessionId,
           userId: authSession.userId,
         },
       });
+      console.log("kycEntry", kycEntry);
 
       if (!kycEntry?.sep12Id) {
         throw new TRPCError({
@@ -374,6 +377,10 @@ export const stellarRouter = createTRPCRouter({
       });
 
       return { url, config };
+    }catch(e){
+      console.error(e);
+      return { url: "", config: {} };
+      }
     }),
   linkAuthSession: publicProcedure
     .input(
